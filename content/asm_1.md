@@ -1,12 +1,12 @@
-# Introduction to assembly
+# Введение в язык ассемблер
 
-Hello! Welcome to our short series of posts about the [assembly](https://en.wikipedia.org/wiki/Assembly_language) programming language.
+Всем Привет!. Добро пожаловать в нашу короткую серию постов о языке программирования [ассемблере](https://en.wikipedia.org/wiki/Assembly_language)
 
-Are you a software developer curious about low-level programming? If so, you're in the right place! If you're just starting to learn programming, assembly might not be the best place to begin. But if you’re already familiar with concepts like hexadecimal numbers, pointers, and boolean logic, have some command-line experience, and know at least one high-level programming language, then you’re ready to dive in.
+Вы разработчик, которому интересно низкоуровневое программирование? Если это так то вы в нужном месте. Если же вы только начинаете изучать программирование, возможно ассемблер не лучший для вас язык. Но все же, если вам уже известны концепции чисел в шестнадцатиричной системе счисления, указателей и булевой логики, а также у вас есть опыт работы с командной строкой и вы  имеете хотя бы немного опыта написания программ, на любом высокоуровневом языке, тогда смело можете приступать к дальнейшему прочтению.
 
-Even though most of us don’t use assembly daily, understanding it can be incredibly valuable. It gives you insight into how computers really work and can deepen your understanding of the software you write. Think of it as peeking under the hood of the tools you use every day.
+В наше время мало кто пишет на ассемблере, но все же его изучение может оказаться крайне полезным. Ведь его понимание, поможет вам узнать как на низком уровне работают приложения которые вы пишете. Можете думать об этом как о более детальном погружении в работу инструментов, которыми вы пользуетесь ежедневно.
 
-In our daily work, we don’t usually write sorting algorithms or string reversal functions manually — we rely on high-level languages, libraries, and frameworks. But have you ever wondered what happens behind the scenes when you write even the simplest code? Let’s start with a basic example:
+В нашей повседневной работе мы обычно не пишем алгоритмы сортировки или функции перестановки строк вручную — мы полагаемся на высокоуровневые языки, их библиотеки и фреймворки. Но задумывались ли вы когда-нибудь о том, что происходит за кулисами, когда вы пишете даже самый простой код? Давайте начнем с простого примера:
 
 ```C
 #include <stdio.h>
@@ -21,13 +21,13 @@ int main() {
 }
 ```
 
-Each of us can understand what this simple piece of C code does. But have you ever thought about how it works at a low level? What does the compiler do with this code? How does the computer load and execute the resulting program? These questions have always interested me, and I suspect I’m not alone. Sure, I can write code in high-level languages like Rust, Erlang, or Go — but what’s really happening behind the scenes?
+Каждый из нас может понять, что делает этот простой фрагмент кода на языке C. Но задумывались ли вы когда-нибудь о том, как он работает на низком уровне? Что компилятор делает с этим кодом? Как компьютер загружает и выполняет полученную программу? Эти вопросы всегда интересовали меня, и я подозреваю, что я не одинок. Конечно, я могу писать код на языках высокого уровня, таких как Rust, Erlang или Go, — но что на самом деле происходит за кулисами?
 
-I first encountered assembly language at university. Back then, I used an old compiler called [Turbo Assembler](https://en.wikipedia.org/wiki/Turbo_Assembler) for some basic exercises. To be honest, I didn’t fully understand what I was doing. Like many students, I just copied code snippets from classmates to get through the assignments. Years passed after graduation, and I’ve spent most of my professional life writing high-level code. Yet, these questions about the low-level workings of my programs kept resurfacing.
+Впервые я столкнулся с языком ассемблера в университете. Тогда я использовал старый компилятор [Turbo Assembler](https://en.wikipedia.org/wiki/Turbo_Assembler) для некоторых базовых заданий. Честно говоря, я не совсем понимал, что делаю. Как и многие студенты, я просто копировал фрагменты кода у однокурсников, чтобы выполнить все упражнения. Прошли годы после окончания университета, и большую часть своей профессиональной жизни я провел за написанием высокоуровневого кода. Тем не менее, эти вопросы о низкоуровневой работе моих программ продолжали появляться в моей жизни.
 
-Driven by curiosity, I decided to revisit assembly. My goal is to share what I’ve learned and document my journey.
+Движимый любопытством, я решил все же вернуться к ассемблеру. Моя цель — поделиться тем, что я узнал, и задокументировать весь свой путь.
 
-Some might argue that learning assembly is unnecessary or that compilers can often generate better assembly code than a human can write. While this is true to some extent, my interest isn’t purely practical — it’s driven by a desire to understand. Plus, assembly is still used in modern software development. Here are a few notable projects where assembly plays a critical role:
+Некоторые могут сказать, что изучение ассемблера не нужно или что компиляторы часто могут генерировать ассемблерный код лучше, чем может тот, что может написать человек. Это в некоторой степени верно, но и мой интерес не является чисто практическим — он обусловлен желанием изучать. Кроме того, ассемблер все еще используется в современной разработке программного обеспечения. Вот несколько примечательных проектов, где ассемблер играет решающую роль:
 
 - [Crypto code in OpenSSL](https://github.com/openssl/openssl/tree/master/crypto/sha/asm)
 - [FFmpeg codec library](https://github.com/FFmpeg/FFmpeg/tree/master/libavcodec/x86)
@@ -35,36 +35,42 @@ Some might argue that learning assembly is unnecessary or that compilers can oft
 - [Browser engines](https://github.com/mozilla/gecko-dev/tree/master/gfx/cairo/libpixman/src)
 - [OpenCV Hardware Acceleration Layer](https://github.com/opencv/opencv/tree/master/modules/core/include/opencv2/core/hal)
 
-So, let's start.
+Так давайте же начнем!
 
-## Preparations
+## Подготовка
 
-Every start needs preparations. This series of posts focuses on assembly programming for the [x86_64](https://en.wikipedia.org/wiki/X86-64) architecture using the [Linux](https://en.wikipedia.org/wiki/Linux) operating system. To follow along, you’ll need a machine with an x86_64 CPU and a [Linux distribution](https://en.wikipedia.org/wiki/Linux_distribution) installed.
+Эта серия постов посвящена программированию на ассемблере для архитектуры [x86_64](https://ru.wikipedia.org/wiki/X86-64) с использованием операционной системы [Linux](https://en.wikipedia.org/wiki/Linux). Чтобы продолжить, вам понадобится машина с процессором x86_64 и установленным [дистрибутивом Linux](https://en.wikipedia.org/wiki/Linux_distribution).
 
-In addition to a Linux machine, you’ll need compilers to build the examples we’ll explore. We’ll mostly use these two compilers for C and assembly examples:
+В дополнение к Linux машине вам понадобятся компиляторы для сборки примеров, которые мы рассмотрим. В основном мы будем использовать эти два компилятора для примеров на языке C и ассемблере:
 
 - [GNU GCC](https://gcc.gnu.org/)
 - [NASM](https://nasm.us/)
 - [GNU LD](https://sourceware.org/binutils/docs/ld/)
 
-We will use these three tools in most of the examples. If we need additional tools, I’ll mention them in the relevant example descriptions. You can install GNU GCC, NASM, and GNU LD using your Linux distribution’s package manager. For [Debian](https://www.debian.org/) or [Ubuntu](https://ubuntu.com/)-based distributions, use:
+Мы будем использовать эти три инструмента в большинстве примеров. Если вдруг понадобится что-то дополнительно, я упомяну об этом в соответствующих описаниях примеров. Вы можете установить GNU GCC, NASM и GNU LD с помощью менеджера пакетов вашего дистрибутива Linux. 
+
+Для дистрибутивов на основе [Debian](https://www.debian.org/) или [Ubuntu](https://ubuntu.com/) используйте:
 
 ```bash
 sudo apt-get install gcc nasm binutils
 ```
 
-For RPM-based distributions, use:
+Для дистрибутивов основанных на RPM, используйте:
 
 ```bash
 sudo dnf install gcc nasm binutils
 ```
 
-For other Linux distributions, refer to their documentation to learn how to install packages.
+Для дистрибутивов основаных на Arch:
+```bash
+yay install gcc nasm binutils
+```
 
-Once you’ve installed and configured these tools, there’s one last thing you’ll need: a text editor to write your assembly code. The choice of editor is entirely up to you. Personally, I use [GNU Emacs](https://www.gnu.org/software/emacs/) with [nasm-mode](https://github.com/skeeto/nasm-mode) for assembly development. However, this is not mandatory — feel free to use any editor you’re comfortable with.
+О том как установить соответствующие пакеты на другие дистрибутивы, вы можете прочитать в документации разработчиков вашего пакетного менеджера.
 
-If you’re using Emacs, you can install `nasm-mode` and configure it with:
+Кроме компилятора и пакета `binutils`, вам также понадобится еще одна вещь: текстовый редактор для написания кода ассемблера. Выбор редактора полностью за вами. Лично я использую [GNU Emacs](https://www.gnu.org/software/emacs/) с [nasm-mode](https://github.com/skeeto/nasm-mode) для разработки ассемблера. Однако это не обязательно — смело используйте любой удобный для вас редактор. 
 
+Для тех кто использует Emacs, установка и настройка допленения `nasm-mode` выглядит следующим образом:
 ```elisp
 (load "~/.emacs.d/lisp/nasm.el")
 
@@ -72,32 +78,32 @@ If you’re using Emacs, you can install `nasm-mode` and configure it with:
 (add-to-list 'auto-mode-alist '("\\.\\(asm\\|s\\|S\\)$" . nasm-mode))
 ```
 
-With these tools and environment ready, let’s get started!
+Когда все приготовления завершены, мы может идти дальше.
 
-## Basics of NASM assembly syntax
+## Основы синтаксиса NASM
 
-Here, we won’t dive into the full syntax of the assembly programming language. Instead, we’ll cover just enough to build and run our first example without diving too deep into the complexities of assembly or the `x86_64` CPU architecture. And what better way to start than with the classic ["Hello, World!"](https://en.wikipedia.org/wiki/%22Hello,_World!%22_program) program?
+Здесь мы не будем погружаться в полный синтаксис языка программирования ассемблер. Вместо этого мы рассмотрим ровно столько, сколько нужно чтобы собрать и запустить наш первый пример, не погружаясь слишком глубоко в сложности языка или архитектуры процессора `x86_64`. И что может быть лучше для начала, чем классическая программа ["Hello, World!"](https://en.wikipedia.org/wiki/%22Hello,_World!%22_program)?
 
-Code usually consists of two main elements: the code itself and comments. Comments in assembly start with the `;` symbol. Code is usually divided into sections (also called memory segments), with each section containing specific types of data. For our "Hello, World!" program, we’ll need just two sections:
+Код обычно состоит из двух основных элементов: самого кода и комментариев к нему. Комментарии в ассемблере начинаются с символа `;`. Код обычно делится на разделы (также называемые сегментами памяти), каждый из которых содержит определенные типы данных. Для нашей программы "Hello, World!" нам понадобится всего два раздела:
 
--  `data` section
--  `text` section
+-  `data` раздел
+-  `text` раздел
 
-The `data` section is used to declare static data with lifetime equal to the program's lifetime. To define the `data` section, use the following syntax:
+Раздел `data` используется для объявления статических данных. Они существует до тех пор, пока работает программа. Чтобы определить раздел `data`, используйте следующий синтаксис:
 
 ```assembly
 ;; Definition of the data section
 section .data
 ```
 
-The `text` section contains instructions for the program. Every program is a set of instructions that tell the computer how to perform a specific task. The assembly program is no different. But before a computer starts to execute a program, it should know where to start from. The beginning of the execution starts from the program's [entry point](https://en.wikipedia.org/wiki/Entry_point). The name of such entry point is usually `_start`. The entry point is set by a special program called **linker** during the building process of a program. The building of a source code to a ready-to-run program consists of two parts:
+Раздел `text` содержит исходный код программы. Каждая программа представляет собой набор инструкций, сообщающих компьютеру, как выполнить определенную задачу. Программа ассемблера ничем не отличается. Но прежде чем компьютер начнет выполнять программу, он должен знать, с чего ему начинать. Выполнение программы начинается с [точки входа](https://ru.wikipedia.org/wiki/%D0%A2%D0%BE%D1%87%D0%BA%D0%B0_%D0%B2%D1%85%D0%BE%D0%B4%D0%B0). Имя такой точки входа обычно `_start`. Во время сборки программы, специальная программа под названием **компоновщик(линкер)**, устанавливает точку входа. Сборка исходного кода в готовую к запуску программу состоит из двух частей:
 
-- Compilation to an [object file](https://en.wikipedia.org/wiki/Object_file).
-- Building an executable from the object files with a [linker](https://en.wikipedia.org/wiki/Linker_(computing)).
+- Компиляция в [объектный файл](https://ru.wikipedia.org/wiki/%D0%9E%D0%B1%D1%8A%D0%B5%D0%BA%D1%82%D0%BD%D1%8B%D0%B9_%D0%BC%D0%BE%D0%B4%D1%83%D0%BB%D1%8C)
+- Сборка исполняемого файла из объектных файлов с помощью [компоновщика](https://ru.wikipedia.org/wiki/%D0%9A%D0%BE%D0%BC%D0%BF%D0%BE%D0%BD%D0%BE%D0%B2%D1%89%D0%B8%D0%BA).
 
-A linker sets the entry point in the resulted executable file. That is why we must specify the entry point in the `text` section of our program so that the linker can find it. The entry point symbol must be defined as `global` so that the symbol `_start` is visible to the linker.
+Так как компоновщик устанавливает точку входа в итоговом исполняемом файле, мы должны явно ему ее указать в разделе `text` нашей программы, чтобы он смог ее найти. Символ точки входа должен быть определен как `global`, чтобы символ `_start` был виден компоновщику.
 
-See the example:
+Смотрите пример:
 
 ```assembly
 ;; Definition of the text section
@@ -111,171 +117,170 @@ _start:
 ```
 
 > [!NOTE]
-> You don't have to name the entry point `_start`. You can overwrite it using the `-e <symbol-name>` option of the [GNU ld linker](https://sourceware.org/binutils/docs/ld/), but we will not use this option in our programs.
+> Вам не обязательно называть точку входа `_start`. Вы можете переназвать ее с помощью опции -e < name > компоновщика [GNU ld](https://ru.wikipedia.org/wiki/GNU_linker), но мы не будем использовать эту опцию в наших программах.
 
-Now that we know how to define the basic sections of our first assembly program, we can look at the first instructions.
+Теперь, когда мы знаем, как определить основные разделы нашей первой программы , мы можем взглянуть и на первые инструкции.
 
-Every NASM assembly source code line contains some combination of the following four fields:
+Каждая строка исходного кода NASM содержит некоторую комбинацию из следующих четырех полей:
 
 ```
 [label:] instruction [operands] [; comment]
 ```
 
-Fields specified in square brackets are optional. A basic `instruction` usually consists of two parts:
+Поля, указанные в квадратных скобках, являются необязательными. Простая инструкция обычно состоит из двух частей:
 
-- Name of the instruction
-- Optional operands of the instruction
+- Название инструкции
+- Опциональные операнды инструкции
 
-If you already have experience with one of the high-level programming languages, you can compare instruction and operands to a function and its parameters. For example, let's take a look at the following assembly line. Here we can see the instruction `mov` and the operands `rax` and `48` used by the instruction:
+Если у вас уже есть опыт работы с одним из языков программирования высокого уровня, вы можете сравнить инструкцию и операнды с функцией и ее параметрами. Например, давайте взглянем на строку исходного кода. Здесь мы видим инструкцию `mov` и операнды `rax` и `48`, которые она принимает:
 
 ```assembly
 ; Put value 48 in the register `rax`
 mov rax, 48
 ```
 
-Now that you understand the basics of assembly syntax and structure, it’s time to write our first program.
+Теперь, когда вы понимаете основы синтаксиса и структуры ассемблера, пришло время написать нашу первую программу.
 
-## "Hello, World!" example
+## Пример "Hello, World!"
 
-Let's write our first assembly program based on this code sample:
+Давайте напишем нашу первую программу на ассемблере на основе этого примера кода:
 
 ```assembly
-;; Definition of the `data` section
+;; Определение сегмента data
 section .data
-    ;; String `msg` variable with the value `hello world!`
+    ;; Переменная типа string со значением `hello world!`
     msg db      "hello, world!"
 
-;; Definition of the text section
+;; Определение сегмента text
 section .text
-    ;; Reference to the entry point of our program
+    ;; Указатель на точку входа нашей программы
     global _start
 
-;; Entry point
+;; Точка входа
 _start:
-    ;; Specify the number of the system call (1 is `sys_write`).
+    ;; Номер системного вызова  (1 для вызова `sys_write`).
     mov     rax, 1
-    ;; Set the first argument of `sys_write` to 1 (`stdout`).
+    ;; Установака первого аргумента для вызова `sys_write` в значение 1 
+    ;; станадртный выход (`stdout`).
     mov     rdi, 1
-    ;; Set the second argument of `sys_write` to the reference of the `msg` variable.
+    ;; Установка второго аргумента для вызова `sys_write` в значение строки msg
     mov     rsi, msg
-    ;; Set the third argument to the length of the `msg` variable's value (13 bytes).
+    ;; Установка третьего аргумента в значение длины строки msg (13 байт).
     mov     rdx, 13
 
-    ;; Call the `sys_write` system call.
+    ;; Вызова `sys_write`.
     syscall
-    ;; Specify the number of the system call (60 is `sys_exit`).
+    ;; Установка нового номера системного вызова (60 для `sys_exit`).
     mov    rax, 60
-    ;; Set the first argument of `sys_exit` to `0`. The `0` status code is success.
+    ;; Установака первого аргумента `sys_exit` в 0. 0 - код успешного завершения.
     mov    rdi, 0
-    ;; Call the `sys_exit` system call.
+    ;; Вызов `sys_exit`.
     syscall
 ```
 
-This may look quite long compared to the "Hello, World!" program written using a high-level programming language. Let’s break it down and understand how it works.
+Исходный код может выглядеть относительно длинным по сравнению с программой "Hello, World!", написанной с использованием языка программирования высокого уровня. Давайте же разберем ее и поймем, как она работает.
 
-### Defining sections
+### Определение разделов
 
-Have a look at the first four lines of the program. At the beginning we defined the `data` section and specified the `msg` variable with the `hello, world!` value. Now we can use it in the program's code.
+Посмотрите на первые четыре строки программы. В начале мы определили раздел `data` и указали переменную `msg` со значением `hello, world!`. Теперь мы можем использовать ее в коде программы.
 
-Next is the declaration of the `text` section and the `_start` entry point of the program. After running the program, it starts from the `_start` line.
+Далее следует объявление раздела `text` и точки входа `_start` программы. После запуска программы она начнется со строки `_start`.
 
-### CPU registers and system calls
+### Регистры процессора и системные вызовы
 
-After defining the program's sections, we can move to the actual code of the program. The first four lines after section definitions start from the `mov` instruction to place specific values into registers. This instruction expects two operands and puts the value of the second operand in the first one. But what are these `rax`, `rdi`, and `rsi`? We can read in the Wikipedia:
+После определения разделов программы мы можем перейти к фактическому коду программы. Первые четыре строки после определений разделов начинаются с инструкции `mov` для помещения определенных значений в регистры. Эта инструкция ожидает два операнда и помещает значение второго операнда в первый. Но что это за `rax`, `rdi` и `rsi`? Мы можем прочитать в Википедии:
 
-> A central processing unit (CPU) is the hardware within a computer that carries out the instructions of a computer program by performing the basic arithmetical, logical, and input/output operations of the system.
+> Центральный процессор (ЦП) — это аппаратное обеспечение компьютера, которое выполняет инструкции компьютерной программы, выполняя основные арифметические, логические операции и операции ввода-вывода системы.
 
-A CPU executes different operations on data. But where is data stored? While the [main memory](https://en.wikipedia.org/wiki/Computer_memory) is an obvious choice, accessing it is relatively slow. Reading and storing data in the main memory slows down the operations because it involves complicated steps to send data requests through the control bus. To speed things up, the CPU uses small, fast storage locations called **general-purpose registers**.
+Процессор выполняет различные операции с данными. Но где же они хранятся? Хотя [оперативная память](https://ru.wikipedia.org/wiki/%D0%9E%D0%BF%D0%B5%D1%80%D0%B0%D1%82%D0%B8%D0%B2%D0%BD%D0%B0%D1%8F_%D0%BF%D0%B0%D0%BC%D1%8F%D1%82%D1%8C) является очевидным выбором, доступ к ней относительно медленный. Чтение и сохранение данных в оперативной памяти замедляет операции, поскольку включает в себя сложные шаги по отправке запросов данных через шину управления. Для ускорения работы процессор использует небольшие, быстрые области хранения, называемые **регистрами общего назначения**.
 
-Each register has a specific size and purpose. For `x86_64` CPUs, general-purpose registers include:
+Каждый регистр имеет определенный размер и назначение. Для процессоров `x86_64` регистры общего назначения выглядят так:
 
 ![registers](/content/assets/registers.png)
 
-We can consider each register as a very small memory slot that can store a value with a size specified in the table above. For example, the `rax` register can contain a value of up to `64` bits, the `ax` register may contain a value of up to `16` bits, and so on. In the next posts, we will learn more about `rax`, `rdi`, `rbx`, and other registers. For now, it is enough to consider them just as small memory slots that a CPU can access fast. Despite these registers are called **general-purpose registers**, does it mean that we may use any register for any purpose? The simple answer is yes. We can use them to perform arithmetic, logical, data transfer and other basic operations. However, there are specific cases when you should use these registers as specified in the [Application Binary Interface](https://en.wikipedia.org/wiki/Application_binary_interface) and the [calling conventions](https://en.wikipedia.org/wiki/X86_calling_conventions) documents. Since these posts are focused on assembly for Linux `x86_64`, the registers have the following meanings:
+Мы можем рассматривать каждый регистр как очень маленькую ячейку памяти, который может хранить значение с размером, указанным в таблице выше. Например, регистр `rax` может содержать значение до `64` бит, регистр `ax` может содержать значение до `16` бит и так далее. В следующих постах мы узнаем больше о `rax`, `rdi`, `rbx` и других регистрах. На данный момент достаточно рассматривать их просто как маленькие ячейки памяти, к которым процессор может быстро получить доступ. Несмотря на то, что эти регистры называются **регистрами общего назначения**, означает ли это, что мы можем использовать любой регистр для любых целей? Простой ответ - да. Мы можем использовать их для выполнения арифметических, логических, операций передачи данных и других базовых операций. Однако существуют особые случаи, когда следует использовать эти регистры, как указано в документах [Application Binary Interface](https://en.wikipedia.org/wiki/Application_binary_interface) и [calling conventions](https://en.wikipedia.org/wiki/X86_calling_conventions). Поскольку эта серия статей посвящена ассемблеру для Linux `x86_64`, регистры имеют следующие значения:
 
-- `rax` - used to store temporary values. In the case of a [system call](https://en.wikipedia.org/wiki/System_call), it should store the system call number.
-- `rdi` - used to pass the first argument to a function.
-- `rsi` - used to pass the second argument to a function.
-- `rdx` - used to pass the third argument to a function.
+- `rax` - используется для хранения временных значений. В случае использования [системного вызова](https://ru.wikipedia.org/wiki/%D0%A1%D0%B8%D1%81%D1%82%D0%B5%D0%BC%D0%BD%D1%8B%D0%B9_%D0%B2%D1%8B%D0%B7%D0%BE%D0%B2), этот регистр должен хранить номер вызова.
+- `rdi` - используется для передачи первого аргумента функции.
+- `rsi` - используется для передачи второго аргумента функции.
+- `rdx` - используется для передачи третьего аргумента функции.
 
-There are more details related to the Linux `x86_64` calling conventions, but the description above should be enough for now. Knowing how these registers are used, we can return to the code. What do we need to write a "Hello, World!" program? Usually, we just pass a `hello world` string to a library function like [printf](https://en.wikipedia.org/wiki/Printf). But these functions typically come from the [standard library](https://en.wikipedia.org/wiki/Standard_library) of the programming language we are using. Assembly doesn’t have a standard library. What should we do in this case? Well, we have at least two options:
+Есть много нюансов, связанных с соглашениями о вызовах Linux архитектуры `x86_64`, но приведенного выше описания должно быть достаточно на данный момент. Зная, как используются эти регистры, мы можем вернуться к коду. Что нам нужно для написания программы "Hello, World!"? Обычно мы просто передаем строку `hello world` в библиотечную функцию, например [printf](https://en.wikipedia.org/wiki/Printf). Но эти функции обычно берутся из [стандартной библиотеки](https://en.wikipedia.org/wiki/Standard_library) используемого нами языка программирования. В ассемблере нет стандартной библиотеки. Что нам делать в этом случае? Ну, у нас есть как минимум два варианта:
 
-- Link our assembly program with the C standard library and use [printf](https://man7.org/linux/man-pages/man3/printf.3.html) or any other function that can help us to write a text to the [standard output](https://en.wikipedia.org/wiki/Standard_streams).
-- Use the operating system's API directly.
+- Скомпоновать нашу ассемблерную программу со стандартной библиотекой C и использовать [printf](https://man7.org/linux/man-pages/man3/printf.3.html) или любую другую функцию, которая может помочь нам записать текст в [стандартный вывод](https://en.wikipedia.org/wiki/Standard_streams).
+- Использовать API операционной системы напрямую.
 
-As we focus mostly on assembly, we will use the second way. Each operating system provides an interface that a user-level application may use to interact with the operating system. Usually, the functions of this interface are called **system calls**. The Linux kernel also provides a set of system calls to interact with it. [Here](https://github.com/torvalds/linux/blob/master/arch/x86/entry/syscalls/syscall_64.tbl) you can find the full list of system calls with their respective numbers for Linux `x86_64`. Looking at this table, we can see such entry for the `sys_write` system call:
+Поскольку мы в основном сосредоточены на ассемблере, мы используем второй способ. Каждая операционная система предоставляет интерфейс, который приложение пользовательского уровня может использовать для взаимодействия с ней. Обычно функции этого интерфейса называются **системными вызовами**. Ядро Linux также предоставляет набор системных вызовов для взаимодействия с ним. [Здесь](https://github.com/torvalds/linux/blob/master/arch/x86/entry/syscalls/syscall_64.tbl) вы можете найти полный список системных вызовов с соответствующими им номерами для Linux `x86_64`. Глядя на эту таблицу, мы можем увидеть такую ​​запись для системного вызова `sys_write`:
 
 ```
 1	common	write			sys_write
 ```
 
-You can learn more about Linux system calls in [manual pages](https://man7.org/linux/man-pages/man2/syscalls.2.html). To learn more about the `sys_write` system call, run the following command in the terminal:
+Вы можете узнать больше о системных вызовах Linux на [страницах руководства ядра linux](https://man7.org/linux/man-pages/man2/syscalls.2.html). Чтобы узнать больше о системном вызове `sys_write`, выполните следующую команду в терминале:
 
 ```bash
 man 2 write
 ```
 
-The manual page shows the following function:
+Вывод будет примерно следующим:
 
 ```C
 ssize_t write(int fd, const void buf[.count], size_t count);
 ```
 
-This function is a wrapper around the `sys_write` system call provided by the standard C library. Usually, the arguments of the system call and the wrapper function are the same. So we can assume that the `sys_write` system call is defined like this:
+Эта функция является оберткой вокруг системного вызова `sys_write`, предоставляемого стандартной библиотекой C. Обычно аргументы системного вызова и функции-обертки совпадают. Поэтому можно предположить, что системный вызов `sys_write` определен следующим образом:
 
 ```C
 ssize_t sys_write(unsigned int fd, const char *buf, size_t count);
 ```
 
-The function expects three arguments:
+Функция ожидает три аргумента:
+- `fd` - дескриптор файла, указывающий, куда записывать данные.
+- `buf` - указатель на буфер, из которого данные будут записаны в файл, указанный дескрипторо`fd`.
+- `count` - количество байтов, которые будут записаны из буфера в файл, указанный дескриптором `fd`.
 
--  `fd` - The file descriptor that specifies where to write data.
--  `buf` - The pointer to the buffer from which data will be written to the file specified by `fd`.
--  `count` - The number of bytes that will be written from the buffer to the file specified by `fd`.
+Теперь мы можем понять, что первые четыре строки ассемблерного кода делают всего две вещи:
 
-Now we can understand that the first four lines of the assembly code do two things:
+- Указывают номер системного вызова (`sys_write` в нашем примере), который мы будем вызывать.
+- Указывают аргументы системного вызова `sys_write`.
 
-- Specify the number of the system call (the `sys_write` in our example) that we will call.
-- Specify the arguments of the `sys_write` system call.
+Посмотрев таблицу системных вызовов, мы может узнать, что системный вызов `sys_write` имеет номер `1`. Поскольку регистр `rax` должен содержать номер системного вызова, мы помещаем в него `1`. Затем мы помещаем единицу в регистр `rdi`. Это будет первый аргумент `sys_write`. Мы ведь хотим вывести строку `hello world` в терминал, поэтому мы помещаем в регистр `rdi` единицу, что указывает на [стандартный вывод](https://en.wikipedia.org/wiki/Standard_streams).
 
-By checking the system call table, we know the `sys_write` system call has the number `1`. Since the `rax` register should contain the system call number, we put `1` into it. Then, we put `1` in the `rdi` register. That will be the first argument of `sys_write`. We want to write the `hello world` string in the terminal, so we put `1` which specifies the [standard output](https://en.wikipedia.org/wiki/Standard_streams).
+Следующий шаг — подготовить второй аргумент системного вызова `sys_write`. В нашем случае мы передаем адрес переменной `msg` в регистр `rsi`. И последнее, но не менее важное: мы должны указать размер данных, которые мы хотим записать. Длина строки `hello, world!` составляет `13` байт, поэтому мы передаем ее в регистр `rdx`.
 
-The next step is to prepare the second argument of the `sys_write` system call. In our case, we pass the address of the `msg` variable to the `rsi` register. Last but not least, we should specify the length of data we want to write. The length of the `hello, world!` string is `13` bytes, so we pass it to the `rdx` register.
+Поскольку мы уже подготовили все параметры системного вызова `sys_write`, теперь мы можем выполнить сам системный вызов. Мы можем сделать это с помощью инструкции `syscall`, которая выведет строку `"hello, world!"` в нашем терминале. Однако, если вы соберете и запустите программу, имеющую только системный вызов `sys_write`, вы увидите ошибку [segmentation fault](https://en.wikipedia.org/wiki/Segmentation_fault). Проблема в том, что нам нужно правильно выйти из программы. Для этого нам нужно выполнить системный вызов `sys_exit` и заполнить регистры необходимыми значениями. Заполните `rax` номером системного вызова `sys_exit`, а соответствующие регистры — параметрами для этого системного вызова.
 
-As we already prepared all the parameters of the `sys_write` system call, we can now execute the system call itself. We can do it with the `syscall` instruction which will print the `"hello, world!"` string in our terminal. However, if you build and run the program having only the `sys_write` system call, you will see the [segmentation fault](https://en.wikipedia.org/wiki/Segmentation_fault) error. The problem is that we need to exit properly from the program. To do that, we have to execute the `sys_exit` system call and fill the registers with the needed values. Fill the `rax` with the number of the `sys_exit` system call and the respective registers with the parameters for this system call.
-
-Let's take a look at the [system call table](https://github.com/torvalds/linux/blob/master/arch/x86/entry/syscalls/syscall_64.tbl):
+Давайте посмотри в таблицу [системных вызовов](https://github.com/torvalds/linux/blob/master/arch/x86/entry/syscalls/syscall_64.tb):
 
 ```
 60	common	exit			sys_exit
 ```
 
-The system call number for `sys_exit` is `60`, so we put `60` into the `rax` register. The `exit` function [manual page](https://www.man7.org/linux/man-pages/man2/exit.2.html) states that the `exit` function expects a single argument: the exit status code. To indicate that the program executed successfully, we put `0` into the `rdi` register (exit status `0` means success). That’s it — our program is now ready to exit.
+Номер системного вызова для `sys_exit` — `60`, поэтому мы помещаем `60` в регистр `rax`. Функция `exit`, как утверждает [страница руководства](https://www.man7.org/linux/man-pages/man2/exit.2.html) , ожидает один аргумент: код статуса выхода. Чтобы указать, что программа выполнена успешно, мы помещаем `0` в регистр `rdi` (статус выхода `0` означает успех). Вот и все — теперь наша программа может успешно завершиться.
 
-### Building and running the program
-
-Now, let’s build the program and create an executable with these commands:
+### Сборка и запуск программы
+Теперь давайте соберем программу и создадим исполняемый файл с помощью следующих команд:
 
 ```bash
 nasm -f elf64 -o hello.o hello.asm
 ld -o hello hello.o
 ```
 
-As it was mentioned in the [Basics of NASM assembly syntax](#basics-of-nasm-assembly-syntax) section, program building consists of two steps:
+Как уже упоминалось раннее, в разделе [[#Основы синтаксиса NASM]], сборка программы состоит из двух этапов:
 
-- Compilation to an [object file](https://en.wikipedia.org/wiki/Object_file).
-- Building an executable from the object files with a [linker](https://en.wikipedia.org/wiki/Linker_(computing)).
+- Компиляция в [объектный файл](https://ru.wikipedia.org/wiki/%D0%9E%D0%B1%D1%8A%D0%B5%D0%BA%D1%82%D0%BD%D1%8B%D0%B9_%D0%BC%D0%BE%D0%B4%D1%83%D0%BB%D1%8C)
+- Сборка исполняемого файла из объектных файлов с помощью [компоновщика](https://ru.wikipedia.org/wiki/%D0%9A%D0%BE%D0%BC%D0%BF%D0%BE%D0%BD%D0%BE%D0%B2%D1%89%D0%B8%D0%BA).
 
-The first command compiles our source code file into an object file. The second command links our resulted object file to an executable program. Now we should have an executable file named `hello`. Let's run it:
+Первая команда компилирует наш исходный код в объектный файл. Вторая команда связывает наш полученный объектный файл с исполняемой программой. Ну вот и все. Теперь у нас должен быть исполняемый файл с именем `hello`. Давайте запустим его:
 
 ```bash
 ./hello
 ```
 
-If everything is done correctly, you will see this output in the terminal:
+Если все было сделано корректно, то мы увидем такой вывод в терминале:
 
 ```
 hello, world!
 ```
 
-🎉 We have our first assembly program 🎉
+🎉 Поздравляю, вы написали первую программу на языке ассемблер. 🎉
