@@ -1,27 +1,27 @@
 
-It is a fifth part of Say hello to x86_64 Assembly and here we will look at macros. It will not be blog post about x86_64, mainly it will be about nasm assembler and it's preprocessor. If you're interesting in it read next.
+Это уже пятая часть цикла "Say hello to x86_64 Assembly" и здесь мы рассмотрим макросы. Это не будет блог-пост о x86_64, в основном он будет об ассемблере NASM и его препроцессоре. Если вам это интересно, читайте дальше.
 
-## Macros
+## Макросы
 
-NASM supports two form of macro:
+NASM поддерживает две формы макросов:
 
-* single-line
-* multiline
+* однострочные
+* многострочные
 
-All single-line macro must start from %define directive. It form is following:
+Все однострочные макросы должны начинаться с директивы `%define`. В общем случае они выглядят следующим образом:
 
 ```assembly
 %define macro_name(parameter) value
 ```
 
-Nasm macro behaves and looks very similar as in C. For example, we can create following single-line macro:
+Макрос NASM ведет себя и выглядит очень так же как и макрос в C. Например, мы можем создать следующий однострочный макрос:
 
 ```assembly
 %define argc rsp + 8
 %define cliArg1 rsp + 24
 ```
 
-and than use it in code:
+и затем использовать его в коде:
 
 ```assembly
 ;;
@@ -32,7 +32,7 @@ cmp rax, 3
 jne .mustBe3args
 ```
 
-Multiline macro starts with %macro nasm directive and end with %endmacro. It general form is following:
+Многострочный макрос начинается с директивы `%macro ` и заканчивается `%endmacro`. Его общая выглядит вот так:
 
 ```assembly
 %macro number_of_parameters
@@ -42,7 +42,7 @@ Multiline macro starts with %macro nasm directive and end with %endmacro. It gen
 %endmacro
 ```
 
-For example:
+Для примера:
 
 ```assembly
 %macro bootstrap 1
@@ -51,14 +51,14 @@ For example:
 %endmacro
 ```
 
-And we can use it:
+Использовать его мы можем вот так:
 
 ```assembly
 _start:
     bootstrap
 ```
 
-For example let's look at PRINT macro:
+Для примера создадим макрос для вывода строки на экран `PRINT`
 
 ```assembly
 %macro PRINT 1
@@ -81,7 +81,7 @@ popa
 %endmacro
 ```
 
-Let's try to go through it macro and understand how it works: At first line we defined PRINT macro with one parameter. Than we push all general registers (with pusha instruction) and flag register with (with pushf instruction). After this we jump to %%astr label. Pay attention that all labels which defined in macro must start with %%. Now we move to __syscall_write macro with 2 parameter. Let's look on __syscall_write implementation. You can remember that we use write system call in all previous posts for printing string to stdout. It looks like this:
+Давайте попробуем разобрать этот макрос и понять, как он работает: В первой строке мы определили макрос `PRINT` с одним параметром. Затем мы помещаем все регистры общего назначения (с помощью инструкции `pusha`) и регистр флагов (с помощью инструкции `pushf`) в стек. После этого мы переходим к метке `%%astr`. Обратите внимание, что все метки, которые определены в макросе, должны начинаться с `%%`. Теперь мы переходим к макросу `__syscall_write` с 2 параметрами. Давайте рассмотрим реализацию `__syscall_write`. Вы можете помнить, что во всех предыдущих постах мы использовали системный вызов `write` для вывода строки в `stdout`. Выглядит это следующим образом:
 
 ```assembly
 ;; write syscall number
@@ -96,21 +96,21 @@ mov rdx, 14
 syscall
 ```
 
-In our __syscall_write macro we define first two instruction for putting 1 to rax (write system call number) and rdi (stdout file descriptor). Than we put %%str to rsi register (pointer to string), where %%str is local label to which is get first parameter of PRINT macro (pay attention that macro parameter access by $parameter_number) and end with 0 (every string must end with zero). And %%strlen which calculates string length. After this we call system call with syscall instruction and that's all.
+В нашем макросе `__syscall_write` мы определяем первые две инструкции для помещения 1 в регистры `rax` (запись номера системного вызова) и `rdi` (файловый дескриптор stdout). Затем мы помещаем `%%str` в регистр `rsi` (указатель на строку), где `%%str `— локальная метка, к которой мы получаем первый параметр макроса `PRINT` (обратите внимание, что доступ к параметру макроса осуществляется по `$parameter_number`) и заканчивается `0` (каждая строка должна заканчиваться нулем). `%%strlen` вычисляет длину строки. После этого мы вызываем системный вызов с помощью инструкции `syscall`, и на этом макрос заканчивается
 
-Now we can use it:
+Теперь мы можем очень просто его использовать:
 
 ```assembly
 label: PRINT "Hello World!"
 ```
 
-## Useful standard macros
+## Полезные стандартные макросы
 
-NASM supports following standard macros:
+NASM поддерживает следующие стандартные макросы:
 
 ### STRUC
 
-We can use `STRUC` and `ENDSTRUC` for data structure defintion. For example:
+Мы можем использовать `STRUCT` и `END STRUCT` для определения структуры данных. Например:
 
 ```assembly
 struc person
@@ -119,7 +119,7 @@ struc person
 endstruc
 ```
 
-And now we can make instance of our structure:
+И теперь мы можем создать экземпляр нашей структуры:
 
 ```assembly
 section .data
@@ -135,4 +135,4 @@ _start:
 
 ### %include
 
-We can include other assembly files and jump to there labels or call functions with %include directive.
+Мы можем включать другие файлы сборки и переходить к их меткам или вызывать функции с помощью директивы %include.
