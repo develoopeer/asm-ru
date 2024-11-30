@@ -1,9 +1,9 @@
 
-The stack is special region in memory, which operates on the principle lifo (Last Input, First Output).
+Как мы уже помним стек — это специальная область в памяти, которая работает по принципу LIFO (Last Input, First Output).
 
-We have 16 general-purpose registers for temporary data storage. They are RAX, RBX, RCX, RDX, RDI, RSI, RBP, RSP and R8-R15. It's too few for serious applications. So we can store data in the stack. Yet another usage of stack is following: When we call a function, return address copied in stack. After end of function execution, address copied in commands counter (RIP) and application continue to executes from next place after function.
+У нас есть 16 регистров общего назначения для временного хранения данных. Это RAX, RBX, RCX, RDX, RDI, RSI, RBP, RSP и R8-R15. Этого слишком мало для серьезных приложений. Поэтому мы можем хранить данные в стеке. Еще одно использование стека следующее: когда мы вызываем функцию, возвращаем адрес, скопированный в стек. После завершения выполнения функции адрес копируется в счетчик команд (RIP), и приложение продолжает выполняться со следующего места после функции.
 
-For example:
+Например:
 
 ```assembly
 global _start
@@ -26,14 +26,16 @@ incRax:
 
 Here we can see that after application runnning, rax is equal to 1. Then we call a function incRax, which increases rax value to 1, and now rax value must be 2. After this execution continues from 8 line, where we compare rax value with 2. Also as we can read in [System V AMD64 ABI](https://refspecs.linuxbase.org/elf/x86_64-abi-0.99.pdf), the first six function arguments passed in registers. They are:
 
-* `rdi` - first argument
-* `rsi` - second argument
-* `rdx` - third argument
-* `rcx` - fourth argument
-* `r8` - fifth argument
-* `r9` - sixth
+Здесь мы видим, что после запуска приложения регистр `rax` равен 1. Затем мы вызываем функцию `incRax`, которая увеличивает значение `rax` до 1, и теперь значение `rax` должно быть равно 2. После этого выполнение продолжается с 8 строки, где мы сравниваем значение `rax` с 2. Также, как мы можем прочитать в [System V AMD64 ABI](https://refspecs.linuxbase.org/elf/x86_64-abi-0.99.pdf), первые шесть аргументов функции передаются в регистрах. Это:
 
-Next arguments will be passed in stack. So if we have function like this:
+* `rdi` - первый аргумент
+* `rsi` - второй аргумент
+* `rdx` - третий аргумент
+* `rcx` - четвертый аргумент
+* `r8`   - пятый аргумент
+* `r9`   - шестой аргумент
+
+Последующие аргументы будут переданы через стек. Так что если у нас есть такая функция:
 
 ```C
 int foo(int a1, int a2, int a3, int a4, int a5, int a6, int a7)
@@ -42,20 +44,18 @@ int foo(int a1, int a2, int a3, int a4, int a5, int a6, int a7)
 }
 ```
 
-Then first six arguments will be passed in registers, but 7 argument will be passed in stack.
+Первые шесть аргументов будут переданы через регистры, а седьмой аргумент будет передан через стек.
 
 ## Stack pointer
 
-As i wroute about we have 16 general-purpose registers, and there are two interesting registers - RSP and RBP. RBP is the base pointer register. It points to the base of the current stack frame. RSP is the stack pointer, which points to the top of current stack frame.
+Как я уже писал, у нас есть 16 регистров общего назначения, и есть два интересных регистра - RSP и RBP. RBP - это регистр указателя базы. Он указывает на базу текущего кадра стека. RSP - это указатель стека, который указывает на вершину текущего кадра стека.
 
-Commands
+Так же у нас есть две инструкции для работы со стеком:
 
-We have two commands for work with stack:
+* `push argument` - увеличивает указатель стека (RSP) и сохраняет аргумент в месте, указанном указателем стека
+* `pop argument` - копирует данные в аргумент из места, указанного указателем стека
 
-* `push argument` - increments stack pointer (RSP) and stores argument in location pointed by stack pointer
-* `pop argument` - copied data to argument from location pointed by stack pointer
-
-Let's look on one simple example:
+Давайте рассмотрим один простой пример:
 
 ```assembly
 global _start
@@ -74,15 +74,17 @@ _start:
 		;; Do something
 		;;
 ```
-Here we can see that we put 1 to rax register and 2 to rdx register. After it we push to stack values of these registers. Stack works as LIFO (Last In First Out). So after this stack or our application will have following structure:
+
+Здесь мы видим, как происходит помещение единицы в регистр `rax` и двойки в регистр `rdx`. После этого мы помещаем в стек значения этих регистров. Так как тек работает по принципу LIFO (Last In First Out), после выполнения он будет иметь следующую структуру:
 
 ![stack diagram](/content/assets/stack-diagram.png)
 
 Then we copy value from stack which has address rsp + 8. It means we get address of top of stack, add 8 to it and copy data by this address to rax. After it rax value will be 1.
+Затем копируем значение из стека, адрес вершины которого указан в регистре `rsp`, прибавляем к нему 8 и копируем данные по этому адресу в `rax`. После этого значение `rax` будет равно 1.
 
-## Example
+## Пример
 
-Let's see one example. We will write simple program, which will get two command line arguments. Will get sum of this arguments and print result.
+Давайте рассмотрим один пример. Мы напишем простую программу, которая получит два аргумента командной строки. Посчитает сумму этих аргументов и выведет результат.
 
 ```assembly
 section .data
@@ -95,9 +97,9 @@ section .data
 		WRONG_ARGC db "Must be two command line argument", 0xa
 ```
 
-First of all we define `.data` section with some values. Here we have four constants for linux syscalls, for sys_write, sys_exit and etc... And also we have two strings: First is just new line symbol and second is error message.
+Прежде всего, мы определяем раздел `.data` с некоторыми значениями. Здесь у нас есть четыре константы для системных вызовов Linux, для sys_write, sys_exit и т. д. А также у нас есть две строки: первая — просто символ новой строки, а вторая — сообщение об ошибке.
 
-Let's look on the `.text` section, which consists from code of program:
+Теперь же, посмотрим на раздел `.text`, который состоит из кода нашей программы:
 
 ```assembly
 section .text
@@ -120,16 +122,16 @@ _start:
 		add r10, r11
 ```
 
-Let's try to understand, what is happening here: After _start label first instruction get first value from stack and puts it to rcx register. If we run application with command line arguments, all of their will be in stack after running in following order:
+Давайте попробуем понять, что здесь происходит: После метки `_start` первая инструкция получает первое значение из стека и помещает его в регистр `rcx`. Если мы запустим приложение с аргументами командной строки, то все они будут в стеке после запуска в следующем порядке:
 
 ```
-    [rsp] - top of stack will contain arguments count.
-    [rsp + 8] - will contain argv[0]
-    [rsp + 16] - will contain argv[1]
-    and so on...
+    [rsp] - вершина стека будет указывать на количество переданных аргументов
+    [rsp + 8] - первый агрумент argv[0]
+    [rsp + 16] - второй аргумент argv[1]
+    и так далее...
 ```
 
-So we get command line arguments count and put it to rcx. After it we compare rcx with 3. And if they are not equal we jump to argcError label which just prints error message:
+Итак, мы получаем количество аргументов командной строки и помещаем его в `rcx`. После этого мы сравниваем `rcx` со значением 3, и если они не равны, мы переходим к метке `argcError`, которая просто выводит сообщение об ошибке:
 
 ```assembly
 argcError:
@@ -147,7 +149,7 @@ argcError:
 	jmp exit
 ```
 
-Why we compare with 3 when we have two arguments. It's simple. First argument is a program name, and all after it are command line arguments which we passed to program. Ok, if we passed two command line arguments we go next to 10 line. Here we shift rsp to 8 and thereby missing the first argument - the name of the program. Now rsp points to first command line argument which we passed. We get it with pop command and put it to rsi register and call function for converting it to integer. Next we read about `str_to_int` implementation. After our function ends to work we have integer value in rax register and we save it in r10 register. After this we do the same operation but with r11. In the end we have two integer values in r10 and r11 registers, now we can get sum of it with add command. Now we must convert result to string and print it. Let's see how to do it:
+Почему мы сравниваем количество аргументов с тройкой, когда у нас два аргумента?Все просто. Первый аргумент — это имя программы, а все после него — это аргументы командной строки, которые мы ей передали. Хорошо, если мы передали два аргумента командной строки, то переходим на строку 10. Здесь мы сдвигаем `rsp` на 8 и тем самым пропускаем первый аргумент — имя программы. Теперь `rsp` указывает на первый аргумент командной строки, который мы передали. Мы получаем его с помощью команды `pop`, помещаем в регистр `rsi` и вызываем функцию для преобразования его в целое число. Далее мы читаем о реализации `str_to_int`. После того, как наша функция завершает работу, у нас есть целочисленное значение в регистре `rax`, и мы сохраняем его в регистре `r10`. После этого мы делаем ту же операцию, но с `r11`. В итоге у нас есть два целочисленных значения в регистрах `r10` и `r11`, теперь мы можем получить их сумму с помощью инструкции `add`. Дальше мы должны преобразовать результат в строку и вывести ее на экран. Давайте посмотрим, как это сделать:
 
 ```assembly
 mov rax, r10
@@ -157,12 +159,12 @@ xor r12, r12
 jmp int_to_str
 ```
 
-Here we put sum of command line arguments to rax register, set r12 to zero and jump to int_to_str. Ok now we have base of our program. We already know how to print string and we have what to print. Let's see at str_to_int and int_to_str implementation.
+Здесь мы помещаем сумму аргументов командной строки в регистр `rax`, устанавливаем `r12` в ноль и переходим к `int_to_str`. Хорошо, у нас есть каркас программы. Мы уже знаем, как печатать строку, и у нас есть что напечатать. Давайте же посмотрим на реализацию `str_to_int` и `int_to_str`.
 
 ```assembly
 str_to_int:
-            xor rax, rax
-            mov rcx,  10
+        xor rax, rax
+        mov rcx,  10
 next:
 	    cmp [rsi], byte 0
 	    je return_str
@@ -177,7 +179,7 @@ return_str:
 	    ret
 ```
 
-At the start of str_to_int, we set up rax to 0 and rcx to 10. Then we go to next label. As you can see in above example (first line before first call of str_to_int) we put argv[1] in rsi from stack. Now we compare first byte of rsi with 0, because every string ends with NULL symbol and if it is we return. If it is not 0 we copy it's value to one byte bl register and substract 48 from it. Why 48? All numbers from 0 to 9 have 48 to 57 codes in asci table. So if we substract from number symbol 48 (for example from 57) we get number. Then we multiply rax on rcx (which has value - 10). After this we increment rsi for getting next byte and loop again. Algorthm is simple. For example if rsi points to '5' '7' '6' '\000' sequence, then will be following steps:
+В начале `str_to_int` мы обнуляем регистр `rax`, и устанавливаем значение 10 в `rcx`. Затем переходим к следующей метке. Как вы можете видеть в примере выше (первая строка перед первым вызовом `str_to_int`), мы помещаем `argv[1]` в `rsi` из стека. Теперь мы сравниваем первый байт `rsi` с 0, потому что каждая строка заканчивается символом NULL, и если это так, мы возвращаемся. Если это не так, мы копируем его значение в однобайтовый регистр bl и вычитаем из него 48. Почему 48? Все числа от 0 до 9 имеют коды от 48 до 57 в таблице asci. Так что если мы вычитаем из символа числа 48 (например, из 57), мы получаем число. Затем мы умножаем `rax` на `rcx` (который имеет значение - 10). После этого мы увеличиваем `rsi` для получения следующего байта и снова выполняем цикл. Алгоритм прост. Например, если `rsi` указывает на последовательность «5», «7», «6», «\000», то будут выполнены следующие шаги:
 
 ```
     rax = 0
@@ -190,7 +192,7 @@ At the start of str_to_int, we set up rax to 0 and rcx to 10. Then we go to next
     and loop it while rsi is not \000
 ```
 
-After str_to_int we will have number in rax. Now let's look at int_to_str:
+После выполнения `str_to_int` у нас будет некоторое число в `rax`. Теперь давайте посмотрим на `int_to_str`:
 
 ```assembly
 int_to_str:
@@ -206,7 +208,7 @@ int_to_str:
 		jmp print
 ```
 
-Here we put 0 to rdx and 10 to rbx. Than we exeute div rbx. If we look above at code before str_to_int call. We will see that rax contains integer number - sum of two command line arguments. With this instruction we devide rax value on rbx value and get reminder in rdx and whole part in rax. Next we add to rdx 48 and 0x0. After adding 48 we'll get asci symbol of this number and all strings much be ended with 0x0. After this we save symbol to stack, increment r12 (it's 0 at first iteration, we set it to 0 at the _start) and compare rax with 0, if it is 0 it means that we ended to convert integer to string. Algorithm step by step is following: For example we have number 23
+Здесь мы помещаем 0 в `rdx` и 10 в `rbx`. Затем мы выполняем инструкцию `div rbx`. Если мы посмотрим на код выше перед вызовом `str_to_int`. Мы увидим, что `rax` содержит целое число - сумму двух аргументов командной строки. С помощью этой инструкции мы делим значение `rax` на значение `rbx` и получаем остаток в `rdx` и целую часть в `rax`. Затем мы прибавляем к `rdx` 48 и 0x0. После прибавления 48 мы получим `asci`-символ этого числа, и все строки должны заканчиваться на 0x0. После этого мы сохраняем символ в стеке, увеличиваем `r12` (он равен 0 на первой итерации, мы устанавливаем его в 0 в _start) и сравниваем `rax` с 0, если он равен 0, то мы закончили преобразование целого числа в строку. Пошаговый алгоритм следующий: Например, у нас есть число 23
 
 ```
     123 / 10. rax = 12; rdx = 3
@@ -219,7 +221,7 @@ Here we put 0 to rdx and 10 to rbx. Than we exeute div rbx. If we look above at 
     compare rax with 0, if yes we can finish function execution and we will have "2" "3" ... in stack
 ```
 
-We implemented two useful function `int_to_str` and `str_to_int` for converting integer number to string and vice versa. Now we have sum of two integers which was converted into string and saved in the stack. We can print result:
+Мы реализовали две полезные функции `int_to_str` и `str_to_int` для преобразования целого числа в строку и наоборот. Теперь у нас есть сумма двух целых чисел, которая была преобразована в строку и сохранена в стеке. Мы можем вывести результат:
 
 ```assembly
 print:
@@ -240,7 +242,7 @@ print:
     jmp exit
 ```
 
-We already know how to print string with `sys_write` syscall, but here is one interesting part. We must to calculate length of string. If you will look on the `int_to_str`, you will see that we increment r12 register every iteration, so it contains amount of digits in our number. We must multiple it to 8 (because we pushed every symbol to stack) and it will be length of our string which need to print. After this we as everytime put 1 to rax (sys_write number), 1 to rdi (stdin), string length to rdx and pointer to the top of stack to rsi (start of string). And finish our program:
+Мы уже знаем, как вывести строку с помощью системного вызова `sys_write`, но вот одна интересная вещь. Мы должны вычислить длину строки. Если вы посмотрите на `int_to_str`, вы увидите, что мы увеличиваем регистр `r12` на каждой итерации, поэтому он содержит количество цифр в нашем числе. Мы должны умножить его на 8 (потому что мы помещаем каждый символ в стек), и это будет длина нашей строки, которую нужно вывести. После этого мы, как и каждый раз, устанавливаем единицу в `rax` (номер sys_write), 1 в `rdi` (stdin), длину строки в `rdx` и указатель на вершину стека в rsi` `(начало строки). И завершаем нашу программу:
 
 ```assembly
 exit:
@@ -250,4 +252,4 @@ exit:
 	syscall
 ```
 
-That's All.
+Это все.
