@@ -1,13 +1,13 @@
 
-Some time ago i started to write series of blog posts about assembly programming for x86_64. You can find it by asm tag. Unfortunately i was busy last time and there were not new post, so today I continue to write posts about assembly, and will try to do it every week.
+Некоторое время назад я начал написание серии постов в блоге о программировании на ассемблере для архитектуры x86_64. К сожалению, в прошлый раз я был занят, и новых постов не было, поэтому сегодня я продолжаю писать посты об ассемблере и постараюсь делать это каждую неделю.
 
-Today we will look at strings and some strings operations. We still use nasm assembler, and linux x86_64.
+Сегодня мы рассмотрим строки и некоторые операции со строками. Мы по-прежнему используем ассемблер NASM и Linux x86_64.
 
-## Reverse string
+## Переворачивание строки
 
-Of course when we talk about assembly programming language we can't talk about string data type, actually we're dealing with array of bytes. Let's try to write simple example, we will define string data and try to reverse and write result to stdout. This tasks seems pretty simple and popular when we start to learn new programming language. Let's look on implementation.
+Конечно, когда мы говорим о языке программирования ассемблер, мы не можем говорить о строковом типе данных, ведь на самом деле мы имеем дело с массивом байтов. Давайте попробуем написать простой пример, в котором определим строковые данные, попробуем их перевернуть и записать результат в `stdout`. Эта задача кажется довольно простой и даже тривиальной, при изучение нового языка программирования. Давайте же рассмотрим ее реализацию.
 
-First of all, I define initialized data. It will be placed in data section (You can read about sections in part):
+Прежде всего, мы определим инициализированные данные в сегменте `data`:
 
 ```assembly
 section .data
@@ -20,26 +20,27 @@ section .data
 		INPUT db "Hello world!"
 ```
 
-Here we can see four constants:
+Взглянем на следующие 4 константы:
 
-* `SYS_WRITE` - 'write' syscall number
-* `STD_OUT` - stdout file descriptor
-* `SYS_EXIT` - 'exit' syscall number
-* `EXIT_CODE` - exit code
+* `SYS_WRITE` - номер системного вызова `sys_write`
+* `STD_OUT`     - номер файлового дескриптора `stdout`
+* `SYS_EXIT`   - номер системного вызова `exit`
+* `EXIT_CODE` - код завершения вызова `exit`
 
-syscall list you can find - here. Also there defined:
+Список системных вызовов вы можете найти - [здесь](https://github.com/torvalds/linux/blob/master/arch/x86/entry/syscalls/syscall_64.tbl). 
+Также в секции `data` определены:
 
-* `NEW_LINE` - new line (\n) symbol
-* `INPUT` - our input string, which we will reverse
+* `NEW_LINE` - символ новой строки `\n`
+* `INPUT` - наша строка, который нужно перевернуть
 
-Next we define bss section for our buffer, where we will put reversed string:
+Далее, разделе `bss`, мы определяем  переменную для нашего буфера, куда мы поместим перевернутую строку:
 
 ```assembly
 section .bss
 		OUTPUT resb 12
 ```
 
-Ok we have some data and buffer where to put result, now we can define text section for code. Let's start from main _start routine:
+Хорошо, у нас есть некоторые данные и буфер для вывода результата, теперь мы можем определить текстовую секцию для кода. Давайте начнем с основной процедуры _start:
 
 ```assembly
 _start:
@@ -53,7 +54,7 @@ _start:
 		jmp reverseStr
 ```
 
-Here are some new things. Let's see how it works: First of all we put INPUT address to si register at line 2, as we did for writing to stdout and write zeros to rcx register, it will be counter for calculating length of our string. At line 4 we can see cld operator. It resets df flag to zero. We need in it because when we will calculate length of string, we will go through symbols of this string, and if df flag will be 0, we will handle symbols of string from left to right. Next we call calculateStrLength function. I missed line 5 with mov rdi, $ + 15 instruction, i will tell about it little later. And now let's look at calculateStrLength implementation:
+Сначала мы помещаем адрес INPUT в регистр `si` в строке 2, как мы делали для записи в `stdout` и записываем нули в регистр `rcx`, это будет счетчик для вычисления длины нашей строки. В строке 4 мы видим оператор `cld`. Он сбрасывает флаг `df` в ноль. Он нам нужен, потому что когда мы будем вычислять длину строки, мы будем проходить по символам этой строки, и если флаг `df` будет равен 0, мы будем обрабатывать символы строки слева направо. Далее мы вызываем функцию `calculateStrLength`. Я пропустил строку 5 с инструкцией `mov rdi, $ + 15`, но расскажу о ней немного позже. А теперь давайте рассмотрим реализацию `calculateStrLength`:
 
 ```assembly
 calculateStrLength:
@@ -71,9 +72,10 @@ calculateStrLength:
 		jmp calculateStrLength
 ```
 
-As you can understand by it's name, it just calculates length of INPUT string and store result in rcx register. First of all we check that rsi register doesn't point to zero, if so this is the end of string and we can exit from function. Next is lodsb instruction. It's simple, it just put 1 byte to al register (low part of 16 bit ax) and changes rsi pointer. As we executed cld instruction, lodsb everytime will move rsi to one byte from left to right, so we will move by string symbols. After it we push rax value to stack, now it contains symbol from our string (lodsb puts byte from si to al, al is low 8 bit of rax). Why we did push symbol to stack? You must remember how stack works, it works by principle LIFO (last input, first output). It is very good for us. We will take first symbol from si, push it to stack, than second and so on. So there will be last symbol of string at the stack top. Than we just pop symbol by symbol from stack and write to OUTPUT buffer. After it we increment our counter (rcx) and loop again to the start of routine.
+Как вы можете понять из названия, эта функция просто вычисляет длину ВХОДНОЙ строки и сохраняет результат в регистре `rcx`. Сначала мы проверяем, что регистр `rsi` не указывает на ноль, если это так, то это конец строки, и мы можем выйти из функции. Далее идет инструкция `lodsb`. Она проста, она просто помещает 1 байт в регистр `al` (младшая часть 16-битного `ax`) и изменяет указатель `rsi`. Когда мы выполнили инструкцию `cld, lodsb` каждый раз будет перемещать `rsi` на один байт слева направо, поэтому мы будем перемещаться по символам строки. 
+После этого мы помещаем значение `rax` в стек, теперь оно содержит символ из нашей строки (`lodsb` помещает байт из `si` в `al`, `al` — это младшие 8 бит `rax`). Зачем мы помещаем символ в стек? Вы должны помнить, как работает стек, он работает по принципу LIFO (последний вошел, первый вышел). Мы возьмем первый символ из `si`, поместим его в стек, затем второй и так далее. Таким образом, последний символ строки будет наверху стека. Затем мы просто заберем символ за символом из стека и запишем в буфер OUTPUT. После этого мы увеличиваем наш счетчик `rcx` и снова возвращаемся к началу процедуры.
 
-Ok, we pushed all symbols from string to stack, now we can jump to exitFromRoutine return to _start there. How to do it? We have ret instruction for this. But if code will be like this:
+Хорошо, мы поместили все символы из строки в стек, теперь мы можем перейти к выходу из процедуры и вернуться к `_start`. Как это сделать? У нас есть инструкция `ret` для этого. Но если код будет выглядеть вот так:
 
 ```assembly
 exitFromRoutine:
@@ -81,18 +83,18 @@ exitFromRoutine:
 		ret
 ```
 
-It will not work. Why? It is tricky. Remember we called calculateStrLength at _start. What occurs when we call a function? First of all function's parameters pushes to stack from right to left. After it return address pushes to stack. So function will know where to return after end of execution. But look at calculateStrLength, we pushed symbols from our string to stack and now there is no return address of stack top and function doesn't know where to return. How to be with it. Now we must take a look to the weird instruction before call:
+то ничего не заработает. Вы спросите почему? Объяснение довольно необычно. Помните, мы вызвали `calculateStrLength` в `_start`. Что происходит, когда мы вызываем функцию? Сначала параметры функции помещаются в стек справа налево. После этого адрес возврата помещается в стек. Таким образом, функция будет знать, куда вернуться после завершения выполнения. Но посмотрите на `calculateStrLength`, мы помещаем символы из нашей строки в стек, и теперь нет адреса возврата вершины стека, и функция не знает, куда вернуться. Теперь мы должны взглянуть на странную инструкцию перед вызовом:
 
 ```assembly
     mov rdi, $ + 15
 ```
 
-First all:
+Для начала
 
-* `$` - returns position in memory of string where $ defined
-* `$$` - returns position in memory of current section start
+* `$` - возвращает позицию в памяти строки, где определен $
+* `$$` - возвращает позицию в памяти текущего раздела
 
-So we have position of mov rdi, $ + 15, but why we add 15 here? Look, we need to know position of next line after calculateStrLength. Let's open our file with objdump util:
+Итак, у нас есть позиция `mov rdi, $ + 15`, непонятно только почему мы добавляем 15? Смотрите, нам нужно знать позицию следующей строки после `calculateStrLength`. Давайте откроем наш файл с помощью утилиты `objdump`:
 
 ```assembly
 objdump -D reverse
@@ -114,7 +116,7 @@ Disassembly of section .text:
   4000d3:	eb 0e                	jmp    4000e3 <reverseStr>
 ```
 
-We can see here that line 12 (our mov rdi, $ + 15) takes 10 bytes and function call at line 16 - 5 bytes, so it takes 15 bytes. That's why our return address will be mov rdi, $ + 15. Now we can push return address from rdi to stack and return from function:
+Здесь мы видим, что строка 12 (наш `mov rdi, $ + 15`) занимает 10 байт, а вызов функции в строке 16 - 5 байт, так что он занимает 15 байт. Вот почему наш адрес возврата будет `mov rdi, $ + 15`. Теперь мы можем поместить адрес возврата из `rdi` в стек и вернуться из функции:
 
 ```assembly
 exitFromRoutine:
@@ -124,7 +126,7 @@ exitFromRoutine:
 		ret
 ```
 
-Now we return to start. After call of the `calculateStrLength` we write zeros to rax and rdi and jump to reverseStr label. It's implementation is following:
+Теперь возвращаемся к `_start`. После вызова `calculateStrLength` записываем нули в регистры `rax` и `rdi` и переходим на метку `reverseStr`. Реализация будет выглядить вот так:
 
 ```assembly
 reverseStr:
@@ -137,9 +139,9 @@ reverseStr:
 		jmp reverseStr
 ```
 
-Here we check our counter which is length of string and if it is zero we wrote all symbols to buffer and can print it. After checking counter we pop from stack to rax register first symbol and write it to OUTPUT buffer. We add rdi because in other way we'll write symbol to first byte of buffer. After this we increase rdi for moving next by OUTPUT buffer, decrease length counter and jump to the start of label.
+Здесь мы проверяем наш счетчик, равный остаточной длине строки, и если он равен нулю, мы записываем все символы в буфер и можем его распечатать. После проверки счетчика мы извлекаем из стека в регистр `rax` первый символ и записываем его в буфер OUTPUT. Мы добавляем `rdi`, потому что в противном случае мы запишем символ в первый байт буфера. После этого мы увеличиваем `rdi` для перемещения дальше по буферу OUTPUT, уменьшаем счетчик длины и переходим к началу метки.
 
-After execution of reverseStr we have reversed string in OUTPUT buffer and can write result to stdout with new line:
+После выполнения `reverseStr` мы перевернули строку в буфере OUTPUT будет лежать перевернутая строка и можем записать результат в stdout:
 
 ```assembly
 printResult:
@@ -159,7 +161,7 @@ printNewLine:
 		jmp exit
 ```
 
-and exit from the our program:
+и выйти из нашей программы:
 
 ```assembly
 exit:
@@ -168,7 +170,7 @@ exit:
 		syscall
 ```
 
-That's all, now we can compile our program with:
+Вот и все, теперь мы можем скомпилировать нашу программу с помощью:
 
 ```assembly
 all:
@@ -179,16 +181,16 @@ clean:
 	rm reverse reverse.o
 ```
 
-and run it:
+и запустить ее:
 
 ![result](/content/assets/result_asm_4.png)
 
-## String operations
+## Операции со строками
 
-Of course there are many other instructions for string/bytes manipulations:
+Конечно, существует множество других инструкций для манипуляций со строками/байтами:
 
-* `REP` - repeat while rcx is not zero
-* `MOVSB` - copy a string of bytes (MOVSW, MOVSD and etc..)
-* `CMPSB` - byte string comparison
-* `SCASB` - byte string scanning
-* `STOSB` - write byte to string
+* `REP` - повторять до тех пор пока rcx не ноль
+* `MOVSB` - скопировать строку байтов (MOVSW, MOVSD and etc..)
+* `CMPSB` - сравнение последовательности байтов
+* `SCASB` - просмотр строки из байтов
+* `STOSB` - запись байта в строку
