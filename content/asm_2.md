@@ -1,29 +1,31 @@
-# The `x86_64` concepts
+# Концепты архитектуры `x86_64`
 
-Some days ago I wrote the first post - [Introduction to assembly](https://github.com/0xAX/asm/blob/master/content/asm_1.md) which to my surprise caused great interest:
+Несколько дней назад я написал первый пост - [Введение в ассемблер](https://github.com/0xAX/asm/blob/master/content/asm_1.md), который, к моему удивлению, вызвал большой интерес:
 
 ![newscombinator](./assets/newscombinator-screenshot.png)
 ![reddit](./assets/reddit-screenshot.png)
 
-It motivated me even more to continue to describe my way of learning assembly programming for Linux x86_64. During these days I got the great feedback from the different people around internet. There were many grateful words, but what is more important to me, there were many advice and much of adequate and very useful critics. Especially I want to say thank you words for the great feedback to:
+Это еще сильнее замотивировало меня продолжать описывать свой путь изучения программирования на ассемблере для Linux x86_64. За эти дни я получил замечательные отзывы от различных людей в интернете. Было много благодарных слов, но что для меня важнее, было много советов и много адекватной и очень полезной критики. Особенно хочу сказать слова благодарности за замечательные отзывы следующим людям:
 
 - [Fiennes](https://reddit.com/user/Fiennes)
 - [Grienders](https://disqus.com/by/Universal178/)
 - [nkurz](https://news.ycombinator.com/user?id=nkurz)
 
-Despite these people I want to say thank you to all who took a part in the discussion on [reddit](https://www.reddit.com/r/programming/comments/2exmpu/say_hello_to_assembly_part_1_linux_x8464/). There were many different opinions, that first part was a not very clear for an absolute beginner. That is why I decided to write more informative posts. So, let's start with the second part of learning assembly programming.
+Помимо этих людей, я хочу сказать спасибо всем, кто принял участие в обсуждении на [reddit](https://www.reddit.com/r/programming/comments/2exmpu/say_hello_to_assembly_part_1_linux_x8464/). Было много разных мнений, о том, что первая часть была не очень понятна для абсолютного новичка. Поэтому я решил писать более информативные посты. Итак, начнем со вторую часть изучения программирования на ассемблере.
 
-## Terminology and Concepts
+## Терминология and Concepts
 
-As I wrote above, I got many comments from the different people that some parts of first post are not clear. Despite I tried to rework the first part to make some things more clear, the main goal of it was just an introduction without diving very deeply. We got our first assembly program that we can run on our computers. Now it is time to start with the basics. Let's start from the description of some terminology that we will see and use in this and in the next parts.
+Как я уже писал выше, я получил много комментариев от разных людей о том, что некоторые части первого поста могли оказаться неясными. Несмотря на то, что я пытался переработать первую часть, чтобы сделать некоторые вещи более понятными, главной целью было просто введение без глубокого погружения. Мы получили нашу первую программу на ассемблере, которую мы можем запустить на нашем компьютере. Теперь пришло время начать с основ. Давайте начнем с описания некоторой терминологии, которую мы увидим и будем использовать в этой и в следующих частях.
 
-### Processor registers
+### Регистры процессора
 
 One of the first concept that we have met in the previous part was - `register`. In the previous chapter we agreed that we can consider a `register` as a small memory slot. If we'll read the definition at [wikipedia](https://en.wikipedia.org/wiki/Processor_register), we will see that it is not so far from the reality:
+Одной из первых концепций, с которой мы познакомились в предыдущей части, был - `регистр`. В предыдущей главе мы согласились, что `регистр` можно рассматривать как небольшую ячейку памяти. Если мы прочитаем определение в [википедии](https://ru.wikipedia.org/wiki/%D0%A0%D0%B5%D0%B3%D0%B8%D1%81%D1%82%D1%80_(%D1%86%D0%B8%D1%84%D1%80%D0%BE%D0%B2%D0%B0%D1%8F_%D1%82%D0%B5%D1%85%D0%BD%D0%B8%D0%BA%D0%B0)), то увидим, что оно не так уж и далеко от реальности:
 
-> A processor register is a quickly accessible location available to a computer's processor.
+> Регистр процессора — это быстродоступная память, доступная процессору компьютера.
 
 The main goal of a processor is data processing. To process data, a processor should be able to access this data somewhere. Of course, a processor can get data from [main memory](https://en.wikipedia.org/wiki/Random-access_memory), but it is "slow" operation. If we will take a look at the [Latency Numbers Every Programmer Should Know](https://samwho.dev/numbers), we will see the following picture:
+Основная цель процессора — обработка данных. Чтобы обрабатывать данные, процессор должен иметь возможность доступа к этим данным. Конечно, как и упоминалось в первой статье, процессор может получать данные из [оперативной памяти](https://ru.wikipedia.org/wiki/%D0%9E%D0%BF%D0%B5%D1%80%D0%B0%D1%82%D0%B8%D0%B2%D0%BD%D0%B0%D1%8F_%D0%BF%D0%B0%D0%BC%D1%8F%D1%82%D1%8C), но это «медленная» операция. Если мы взглянем на сайт [Задержки испольнения, которые должен знать каждый программист](https://samwho.dev/numbers), то увидим следующую картину:
 
 > L1 cache reference = 1ns
   ...
@@ -31,42 +33,41 @@ The main goal of a processor is data processing. To process data, a processor sh
   ...
   Main memory reference = 100ns
 
-Access to the [L1 cache](https://en.wikipedia.org/wiki/CPU_cache) is `100x` times faster than access to the main memory. The processor registers are 'closer' to the processor. For example you can take a look at the list of latencies for different instructions by [Agner Fog](https://www.agner.org/optimize/#manual_instr_tab).
+Доступ к [кэшу L1](https://ru.wikipedia.org/wiki/%D0%9A%D1%8D%D1%88#%D0%A3%D1%80%D0%BE%D0%B2%D0%BD%D0%B8_%D0%BA%D1%8D%D1%88%D0%B0) в `100x` раз быстрее, чем доступ к оперативной памяти. Регистры процессора находятся ближе к процессору. Например, вы можете взглянуть на список задержек для различных инструкций [Agner Fog](https://www.agner.org/optimize/#manual_instr_tab).
 
 There are different types of registers on the `x86_64` processors:
 
-- General purpose registers
-- Segment registers
-- RFLAGS registers
-- Control registers
-- Model-specific registers
-- Debug registers
-- x87 FPU registers
-- MMX registers
-- XMM registers
-- YMM registers
-- ZMM registers
-- Bounds registers
-- Memory management registers
+- Регистры общего назначения
+- Регистры сегментов
+- Регистры RFLAGS
+- Регистры управления
+- Регистры, специфичные для архитектуры
+- Регистры отладки
+- Регистры x87 FPU
+- Регистры MMX
+- Регистры XMM
+- Регистры YMM
+- Регистры ZMM
+- Регистры защиты памяти
+- Регистры управления памятью
 
-The detailed description of any type of registers you can find in the [Intel software developer manuals](https://www.intel.com/content/www/us/en/developer/articles/technical/intel-sdm.html). For this moment we will stop only at the description of the general purpose registers as in most of our examples we will use mostly them. If we will use other types of registers, this will be mentioned in the respective example. We already have seen the set of the general purpose registers in the [previous chapter](https://github.com/0xAX/asm/blob/master/content/asm_1.md):
+Подробное описание любого типа регистров вы можете найти в [руководствах для разработчиков программного обеспечения Intel](https://www.intel.com/content/www/us/en/developer/articles/technical/intel-sdm.html). На данный момент мы остановимся только на описании регистров общего назначения, так как в большинстве наших примеров мы будем использовать в основном именно их. Если мы будем использовать другие типы регистров, это будет упомянуто в соответствующем примере. Мы уже видели набор регистров общего назначения в [предыдущей главе](https://github.com/0xAX/asm/blob/master/content/asm_1.md):
 
 ![registers](/content/assets/registers.png)
 
-We have `16` registers with size of 64 bits, from `rax` to `r15`. Some parts of each `64-bit` register has own name. For example, as we may see in the table above, the lower `32-bits` of the `rax` register is called `eax`. In the same way, the lower `16 bits` of the `eax` register is called `ax`. In the end, the lower `8 bits` if the `ax` register is called `al` and the higher `8 bits` is called `ah`. Schematically we can look at this as:
+У нас есть `16` регистров размером 64 бита, от `rax` до `r15`. Некоторые части каждого `64-битного` регистра имеют собственное имя. Например, как мы можем видеть в таблице выше, нижние `32-бита` регистра `rax` называются `eax`. Таким же образом, нижние `16 бит` регистра `eax` называются `ax`. В конце концов, нижние `8 бит` регистра `ax` называются `al`, а верхние `8 бит` называются `ah`. Схематически это можно представить так:
 
 ![rax](/content/assets/rax.svg)
 
-The general purpose registers are used in many different cases like performing of arithmetic and logical operations, transferring of data, memory address calculation operations, passing parameters to the functions and system calls and many more. During going through this and other posts we will see how the general purpose registers could be used to perform different operations.
+Регистры общего назначения используются во многих различных случаях, таких как выполнение арифметических и логических операций, передача данных, операции вычисления адреса памяти, передача параметров функциям и системным вызовам и многое другое. При прочтении этого и других постов мы увидим, как регистры общего назначения могут использоваться для выполнения различных операций.
 
-### Endianness
+### Порядок байтов
 
-A computer operates with bytes. The bytes could be stored in memory in different order. This order in which a computer stores a sequence of bytes called - `endianness`. There are two types of endianness:
+Компьютер оперирует байтами. Байты могут храниться в памяти в разном порядке. Этот порядок, в котором компьютер хранит последовательность байтов, собственно и называется - `порядком байтов`. Существует два типа:
+- `big endian`
+- `little endian`
 
-- `big`
-- `little`
-
-We can imagine memory as one large array of bytes. Each byte has own address. For example let's consider we have the following four bytes in memory: `AA 56 AB FF`. In the `little-endian` order the least significant byte has the smallest address:
+Мы можем представить себе память как один большой массив байтов. Каждый байт имеет свой адрес. Например, предположим, что у нас в памяти есть следующие четыре байта: `AA 56 AB FF`. В порядке `little-endian` младший байт имеет наименьший адрес:
 
 | Address            | Byte |
 |--------------------|------|
@@ -75,7 +76,7 @@ We can imagine memory as one large array of bytes. Each byte has own address. Fo
 | 0x0000000000000002 | 0x56 |
 | 0x0000000000000003 | 0xAA |
 
-In a case of the `big-endian` order, the bytes are stored in the opposite order to the `little-endian`. So if have a look at the same set of bytes - `AA 56 AB FF`, it will be:
+В случае с `big-endian` байты хранятся в порядке, противоположном `little-endian`. Так что если взглянуть на тот же набор байтов - `AA 56 AB FF`, то результат будет таким:
 
 | Address            | Byte |
 |--------------------|------|
@@ -84,28 +85,28 @@ In a case of the `big-endian` order, the bytes are stored in the opposite order 
 | 0x0000000000000002 | 0xAB |
 | 0x0000000000000003 | 0xFF |
 
-### System call
+### Системные вызовы
 
-A [system calls](https://en.wikipedia.org/wiki/System_call) - is a set of APIs provided by an operating system. A user level program can use this API to achieve different functionality that an operating system kernel can provide. As it was mention in the previous [chapter](https://github.com/0xAX/asm/blob/master/content/asm_1.md), you can find all the system calls of the Linux kernel for the `x86_64` architecture [here](https://github.com/torvalds/linux/blob/master/arch/x86/entry/syscalls/syscall_64.tbl).
+[Системные вызовы](https://en.wikipedia.org/wiki/System_call) — это набор API, предоставляемый операционной системой. Программа уровня пользователя может использовать этот API для достижения различных функциональных возможностей, которые может предоставить ядро ​​операционной системы. Как упоминалось в предыдущей [главе](https://github.com/develoopeer/asm/blob/master/content/asm_1.md), вы можете найти все системные вызовы ядра Linux для архитектуры `x86_64` [здесь](https://github.com/torvalds/linux/blob/master/arch/x86/entry/syscalls/syscall_64.tbl).
 
-There are two ways to execute a system call. We can call a library function like [printf](https://man7.org/linux/man-pages/man3/fprintf.3.html) for example which in its order will use OS level API or we can call a system call directly using the `syscall` instruction. In order execute a system call directly, we need to prepare the parameters of this function. As we have seen in the previous part, some general purpose registers were used for this goal. How the system calls and functions are called and how their parameters are passed is called - `calling conventions`. For the Linux `x86_64`, the calling conventions are specified in the [System V Application Binary Interface](https://en.wikipedia.org/wiki/Application_binary_interface) document.
+Существует два способа выполнения системного вызова. Мы можем вызвать библиотечную функцию, к примеру, [printf](https://man7.org/linux/man-pages/man3/fprintf.3.html), которая уже в свою очередь будет использовать API  Операционной Системы, или мы можем вызвать системный вызов самостоятельно, используя инструкцию `syscall`. Чтобы выполнить системный вызов напрямую, нам нужно подготовить параметры этой функции. Как мы видели в предыдущей части, для этой цели использовались некоторые регистры общего назначения. То, как вызываются системные вызовы и функции, и как передаются их параметры, называется - `соглашения о вызовах`. Для Linux `x86_64` соглашения о вызовах указаны в документе [System V Application Binary Interface](https://en.wikipedia.org/wiki/Application_binary_interface).
 
-Let's take a closer look how arguments are passed to a system call if we are going to trigger one using `syscall` instruction.
+Давайте подробнее рассмотрим, как аргументы передаются в системный вызов, если мы собираемся вызвать его с помощью инструкции `syscall`.
 
-The first six parameters are passed in the following general purpose registers:
+Первые шесть параметров передаются в следующие регистры общего назначения:
 
-- `rdi` - used to pass the first argument to a function.
-- `rsi` - used to pass the second argument to a function.
-- `rdx` - used to pass the third argument to a function.
-- `r10` - used to pass the fourth argument to a function.
-- `r8` - used to pass the fifth argument to a function.
-- `r9` - used to pass the sixth argument to a function.
+- `rdi` - используется для передачи первого аргумента в функцию.
+- `rsi` - используется для передачи второго аргумента в функцию.
+- `rdx` - используется для передачи третьего аргумента в функцию.
+- `r10` - используется для передачи четвертого аргумента в функцию.
+- `r8` - используется для передачи пятого аргумента в функцию.
+- `r9` - используется для передачи шестого аргумента в функцию.
 
-If we are using user-level wrapper instead of calling a system call directly, the order of registers and parameters will be different. For this moment, let's focus only on the calling conventions of the system calls using the Linux kernel interface. The number of a system call is passed in the `rax` register. After all the parameters are prepared, the system call is called with the instruction `syscall`. After the system call is finished to work, the result is returned in the `rax` register.
+Если мы используем какую-либо обертку пользовательского пространства вместо прямого вызова системного вызова, порядок регистров и параметров будет другим. На данный момент давайте сосредоточимся только на соглашениях о системных вызовов с использованием интерфейса ядра Linux. Номер системного вызова передается в регистре `rax`. После подготовки всех параметров системный вызов вызывается с помощью инструкции `syscall`. После завершения работы результат возвращается в регистре `rax`.
 
-### Program sections
+### Секции программы
 
-As we have seen in the first post, each program consists from program sections (or segments). Each executable file on Linux x86_64 is represented in [ELF](https://en.wikipedia.org/wiki/Executable_and_Linkable_Format) format. Each ELF file has table of sections that is a program consists from. We may see the list of sections of our `hello` program from the previous post using the [readelf](https://man7.org/linux/man-pages/man1/readelf.1.html) utility:
+Как мы уже видели в первом посте, каждая программа состоит из программных разделов (или сегментов). Каждый исполняемый файл в Linux x86_64 представлен в формате [ELF](https://en.wikipedia.org/wiki/Executable_and_Linkable_Format). Каждый файл ELF имеет таблицу разделов, из которых состоит программа. Мы можем увидеть список разделов нашей программы `hello` из предыдущего поста с помощью утилиты [readelf](https://man7.org/linux/man-pages/man1/readelf.1.html):
 
 ```
 ~$ strip hello && readelf -S hello
@@ -130,24 +131,24 @@ Key to Flags:
   D (mbind), l (large), p (processor specific)
 ```
 
-As we may see, there are four sections. Two of them we added by ourselves during writing the assembly code. The additional two sections added by the compiler. Technically we can define any section in our program. But there are well known sections:
+Как мы видим, в программе есть четыре раздела. Два из них мы добавили сами во время написания ассемблерного кода. Дополнительные два раздела добавил компилятор. Технически мы можем самостоятельно раздел в исполняемом файле с любым названием. Но есть общеизвестные разделы:
 
-- `data` - section is used for declaring initialized data or constants.
-- `bss` - section is used for declaring non initialized variables.
-- `text` - section is used for code of the program.
-- `shstrtab` - section that stores references to the existing sections.
+- `data` - раздел используется для объявления инициализированных данных или констант.
+- `bss` - раздел используется для объявления неинициализированных переменных.
+- `text` - раздел используется для кода программы.
+- `shstrtab` - раздел, в котором хранятся ссылки на существующие разделы.
 
-### Data types
+### Типы данных
 
-Obviously assembly is not a [statically typed programming language](https://en.wikipedia.org/wiki/Category:Statically_typed_programming_languages). Usually we operate with set of bytes. Despite this, [NASM](https://nasm.us/) gives us some helpers at least to define the size of data that we are operating. The fundamental data types are:
+Очевидно, что ассемблер не является [статически типизированным языком программирования](https://ru.wikipedia.org/wiki/%D0%A1%D1%82%D0%B0%D1%82%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B0%D1%8F_%D1%82%D0%B8%D0%BF%D0%B8%D0%B7%D0%B0%D1%86%D0%B8%D1%8F). Обычно мы работаем с набором байтов. Несмотря на это, [NASM](https://nasm.us/) дает нам некоторые абстракции, по крайней мере, для определения размера данных, с которыми мы работаем. Основные типы данных:
 
-- `byte`
-- `word`
-- `doubleword`
-- `quadword`
-- `double quadword`
+- `байт`
+- `слово`
+- `двойное слов`
+- `четверть-слово`
+- `двойное четверть-слово`
 
-A byte is eight bits, a word is two bytes, a doubleword is four bytes, a quadword is eight bytes and a double quadword is sixteen bytes. NASM provides pseudo-instructions to help us to define data with the given size:
+Байт — это восемь бит, слово — это два байта, двойное слово — это четыре байта, четверть-слово — это восемь байтов, а двойное четверть-слово — это шестнадцать байтов. NASM предоставляет псевдоинструкции, которые помогут нам определить данные с заданным размером:
 
 - `DB`
 - `DW`
@@ -158,9 +159,8 @@ A byte is eight bits, a word is two bytes, a doubleword is four bytes, a quadwor
 - `DY`
 - `DZ`
 
-The pseudo-instructions from `DB` to `DQ` are used to define data with the size from byte to double quadword. The `DT` is used to define `10` bytes. The `DO` is used to define `16` bytes. The `DY` is used to define `32` bytes. The `DZ` is used to define `64` bytes. In addition there are alternatives to define uninitialized storage - `RESB`, `RESW`, `RESD`, `RESQ`, `REST`, `RESO`, `RESY` and `RESZ`.
-
-For example:
+Псевдоинструкции от `DB` до `DQ` используются для определения данных размером от байта до двойного четверть-слова. `DT` используется для определения `10` байт. `DO` используется для определения `16` байт. `DY` используется для определения `32` байт. `DZ` используется для определения `64` байт. Кроме того, существуют альтернативы для определения неинициализированной памяти - `RESB`, `RESW`, `RESD`, `RESQ`, `REST`, `RESO`, `RESY` и `RESZ`.
+Например:
 
 ```assembly
 section .data
@@ -172,50 +172,50 @@ section .data
     msg    db "Sum is correct", 10
 ```
 
-If we will access a variable, that is defined in this way we will get the address of it but not the actual value. If we want to get the actual value that is located by the given address we need to specify the variable name in square brackets:
+Если мы обратимся к переменной, которая определена таким образом, мы получим ее адрес, но не фактическое значение. Если мы хотим получить фактическое значение, которое находится по данному адресу, нам нужно указать имя переменной в квадратных скобках:
 
 ```
 ;; Move the value of the num1 to the al register
 mov al, [num1]
 ```
 
-The size of pointers have the special notation:
+Размеры указателей имеют специальное обозначение:
 
 ```assembly
 ;; move 4 bytes value from the edi register to the address stored in the rbp register minus 4 bytes offset
 mov     DWORD PTR [rbp-4], edi
 ```
 
-Most of the time we are working with numbers. There two types of integer numbers:
+Большую часть времени мы работаем с целочисленым типо(int). Существует два типа целых чисел:
 
-- `unsigned`
-- `signed`
+- `unsigned int` 
+- `signed int`
 
-The difference between these two types of numbers is that first can not accept negative numbers. Negative numbers represented with the [Two's complement](https://en.wikipedia.org/wiki/Two%27s_complement) method. In the next posts we will see how floating point numbers are represented.
+Разница между этими двумя типами чисел в том, что первый не может принимать отрицательные числа. Отрицательные числа, представленные [доплнительным кодом](https://ru.wikipedia.org/wiki/%D0%94%D0%BE%D0%BF%D0%BE%D0%BB%D0%BD%D0%B8%D1%82%D0%B5%D0%BB%D1%8C%D0%BD%D1%8B%D0%B9_%D0%BA%D0%BE%D0%B4). В следующих постах мы также посмотрим, как представляются числа с плавающей точкой.
 
-### Stack
+### Стек
 
-We can not dive into assembly programming without knowing one of the crucial concept of the `x86_64` (and not only) architecture - the stack. The stack is a memory area of a program that is accessed in a [last in, first out](https://en.wikipedia.org/wiki/Stack_(abstract_data_type)) pattern.
+Мы не можем и дальше рассматривать программирование на ассемблере, не зная одного из важнейших понятий архитектуры `x86_64` (и не только) - стека. Стек - это область памяти программы, доступ к которой осуществляется по шаблону [первым-зашел,последним-вышел](https://en.wikipedia.org/wiki/Stack_(abstract_data_type)).
 
-A processor has a very restricted count of registers. As we already know, an `x86_64` processor gives us access to the `16` general purpose registers. This number is very limited. We may need more or even much more space to store our data. The one of the way to solve this issue is using the program's stack. Basically we can look at the stack as at the usual concept of memory area, but with the single significant difference - the access pattern. With the usual [RAM](https://en.wikipedia.org/wiki/Random-access_memory) model we can access any byte of the memory which is accessible to our user-level application. The stack is accessed as [last in, first out](https://en.wikipedia.org/wiki/Stack_(abstract_data_type)) pattern. There are two special instructions that are used to push a value on the stack and pop a value from it:
+Процессор имеет очень ограниченное количество регистров. Как мы уже знаем, процессор `x86_64` дает нам доступ к `16` регистрам общего назначения. Это на самом деле не так много, и вполне возможно что нам потребуется больше или даже намного больше места для хранения наших данных. Один из способов решения этой проблемы - использование **стека** программы. По сути, мы можем рассматривать стек как обычную концепцию области памяти, но с единственным существенным отличием - шаблоном доступа. С обычной моделью [RAM](https://ru.wikipedia.org/wiki/%D0%97%D0%B0%D0%BF%D0%BE%D0%BC%D0%B8%D0%BD%D0%B0%D1%8E%D1%89%D0%B5%D0%B5_%D1%83%D1%81%D1%82%D1%80%D0%BE%D0%B9%D1%81%D1%82%D0%B2%D0%BE_%D1%81_%D0%BF%D1%80%D0%BE%D0%B8%D0%B7%D0%B2%D0%BE%D0%BB%D1%8C%D0%BD%D1%8B%D0%BC_%D0%B4%D0%BE%D1%81%D1%82%D1%83%D0%BF%D0%BE%D0%BC) мы можем получить доступ к любому байту памяти, доступному нашему приложению пользовательского пространства. Существуют две специальные инструкции, которые используются для помещения значения в стек и извлечения значения из него:
 
-- `push` - push the operand on the stack.
-- `pop` - pop the top value from the stack.
+- `push` - помещает операнд в стек.
+- `pop`   - извлекает операнд из стека.
 
-The stack grows downwards from the high addresses to low. So, basically when we hear `top of the stack`, it means the lowest address. The general purpose registers `rsp` always should point to the top of the stack. In the [system call](#system-call) section, we have seen that first six arguments of a system call are passed in the general purpose registers. According to the calling conventions document:
+Стек растет вниз от высоких адресов к низким. Поэтому, в основном, когда мы слышим про вершину стека, речь идет о самом низком адресе. Регистр общего назначения `rsp` всегда должны указывать на вершину стека. В разделе [[#Системные вызовы|системные вызовы]] мы видели, что первые шесть аргументов системного вызова передаются в регистры общего назначения. Согласно документу соглашений о вызовах:
 
-> System-calls are limited to six arguments, no argument is passed directly on the stack.
+> Системные вызовы ограничены шестью аргументами, ни один аргумент не передается напрямую в стек.
 
-So the available number of the general purpose registers should be enough to execute any system call. But what about other functions? What if one has more than six arguments? In this case the first six parameters are also passed in the general purpose registers and the all the next parameters are passed on the stack. The set of the general purpose registers to call a library function is slightly different from the set of registers used for a system call:
+Получается, что доступного количества регистров общего назначения должно быть достаточно для выполнения любого системного вызова. Но что насчет других функций? Что, если у функции больше шести аргументов? В этом случае первые шесть параметров также передаются в регистрах общего назначения, а все последующие параметры передаются в стеке. Набор регистров общего назначения для вызова библиотечной функции немного отличается от набора регистров, используемых для системного вызова:
 
-- `rdi` - used to pass the first argument to a function.
-- `rsi` - used to pass the second argument to a function.
-- `rdx` - used to pass the third argument to a function.
-- `rcx` - used to pass the fourth argument to a function.
-- `r8` - used to pass the fifth argument to a function.
-- `r9` - used to pass the sixth argument to a function.
+- `rdi` - используется для передачи первого аргумента функции.
+- `rsi` - используется для передачи второго аргумента функции.
+- `rdx` - используется для передачи третьего аргумента функции.
+- `rcx` - используется для передачи четвертого аргумента функции.
+- `r8`   - используется для передачи пятого аргумента функции.
+- `r9`   - используется для передачи шестого аргумента функции.
 
-Let's take a look at the assembly code of the a bit artificial functions written in C programming language:
+Давайте посмотрим на ассемблерный код некоторых искусственных функций, написанных на языке программирования C:
 
 ```C
 int foo(int arg1, int arg2, int arg3, int arg4, int arg5, int arg6, int arg7, int arg8) {
@@ -227,7 +227,7 @@ int bar() {
 }
 ```
 
-If we will compile it and have a look at the assembly code, we will see something like that:
+Если мы скомпилируем его и посмотрим на ассемблерный код, то увидим что-то вроде этого:
 
 ```assembly
 bar:
@@ -286,82 +286,82 @@ foo:
 ```
 
 > [!NOTE]
-> The C program should be compiled without any optimization flags. You can use `-O0 -masm=intel` flags for compiler to avoid optimization. You can use tools like [godbolt](https://godbolt.org/) to see the assembly output of these functions.
+> Программа на языке C должна быть скомпилирована без каких-либо флагов оптимизации. Вы можете использовать флаги -O0 -masm=intel для компилятора, чтобы избежать ее. Также можете использовать такие инструменты, как godbolt, чтобы увидеть вывод сборки этих функций.
 
-First of all let's take a look at the first two lines of code in the function `bar`:
+Прежде всего давайте посмотрим на первые две строки кода в функции `bar`:
 
 ```assembly
 push    rbp
 mov     rbp, rsp
 ```
 
-The names of these two instructions in the beginning of each function is - [function prologue](https://en.wikipedia.org/wiki/Function_prologue_and_epilogue#Prologue). Each function usually operates with a part of the stack. Such part is called a [stack frame](https://en.wikipedia.org/wiki/Call_stack). To manage stack CPU is using the several general purpose registers:
+Название этих двух инструкций в начале каждой функции - [пролог функции](https://en.wikipedia.org/wiki/Пролог_и_эпилог_функции#Пролог). Каждая функция обычно работает с частью стека. Такая часть называется [фреймом стека](https://en.wikipedia.org/wiki/Стек_вызовов). Для управления стеком процессор использует несколько регистров общего назначения:
 
 - `rip`
 - `rsp`
 - `rbp`
 
-The general purpose register `rip` is the so-called `instruction pointer`. This register store the address of the next instruction CPU is going to execute. When CPU meets the `call` instruction in order to call a function, it pushes the address of the next instruction after the function call to the stack. This is done in order to know where to return from the called function.
+Регистр общего назначения `rip` — это так называемый указатель инструкции (`instruction pointer`). Этот регистр хранит адрес следующей инструкции, которую собирается выполнить ЦП. Когда ЦП встречает инструкцию `call` для вызова функции, он помещает в стек адрес следующей инструкции после вызова функции. Это делается для того, чтобы знать, куда вернуться из вызванной функции.
 
-The `rsp` register is always points to the `top` of the stack and called - `stack pointer`. After we push something on the stack using the `push` instruction, the stack pointer address is decreased. After we pop something from the stack using the `pop` instruction, the stack pointer address is increased.
+Регистр `rsp` всегда указывает на `вершину` стека и называется - указателем стека(`stack pointer`). После того, как мы что-то помещаем в стек с помощью инструкции `push`, адрес указателя стека уменьшается. После того, как мы что-то извлекаем из стека с помощью инструкции `pop`, адрес указателя стека увеличивается.
 
 The general purpose register `rbp` is the so-called `frame pointer` or `base pointer`. As we mentioned above, each function has own `stack frame` - is a memory area where function stores [local variables](https://en.wikipedia.org/wiki/Local_variable) and other data.
+Регистр общего назначения `rbp` - это так называемый указатель кадра(`frame pointer`) или указатель базы(`base pointer`). Как мы уже упоминали выше, каждая функция имеет свой `фрейм стека` - это область памяти, где функция хранит [локальные переменные](https://ru.wikipedia.org/wiki/%D0%9B%D0%BE%D0%BA%D0%B0%D0%BB%D1%8C%D0%BD%D0%B0%D1%8F_%D0%BF%D0%B5%D1%80%D0%B5%D0%BC%D0%B5%D0%BD%D0%BD%D0%B0%D1%8F) и другие данные.
 
-Now as we know the rough meaning of the stack frame term and the usage of the `rbp`, `rsp` and `rip` registers let's try to understand what happens when we call a function. Let's take a look at the stack right before the `call foo` is executed. Our stack looks like this:
+Теперь, когда мы знаем приблизительное значение термина кадр стека и использование регистров `rbp`, `rsp` и `rip`, давайте попробуем понять, что происходит, когда мы вызываем функцию. Посмотрим на стек прямо перед выполнением `call foo`. Сейчас наш стек выглядит так:
 
 ![stack-before-call](./assets/stack-before-call.svg)
 
-After the execution of the `call` instruction, the return address (or address of the next instruction) is pushed to the stack. So our stack layout will look like this:
+После выполнения инструкции `call` адрес возврата (или адрес следующей инструкции) помещается в стек. Таким образом, наша структура стека будет выглядеть уже следующим образом:
 
 ![stack-during-call](./assets/stack-during-call.svg)
 
-Right in the beginning of the new function we have to preserve `rbp` value pushing it onto the stack. At this time the `rbp` register contains base pointer of the previous function or in other words we may say that the value of the `rbp` in the beginning of each function represents the address of the bottom (or the base) of the stack of the caller. Since we are in the new function - it needs a new stack frame and as a result the new base. After this point we have the following stack layout:
+Прямо в начале новой функции мы должны сохранить значение `rbp`, поместив его в стек. В это время регистр `rbp` содержит указатель базы предыдущей функции или, другими словами, можно сказать, что значение `rbp` в начале каждой функции представляет собой адрес дна (или базы) стека вызывающей функции. Поскольку мы находимся в новой функции - ей нужен новый кадр стека и, как следствие, новая база. После этого момента структура нашего стека будет выглядеть уже так:
 
 ![stack-preserve-bp](./assets/stack-preserve-bp.svg)
 
-The next step is to put the value of the current stack pointer in the `rbp`. Starting from this point we have new stack frame for our function `foo`. Since the stack frame is ready we can start to manage function parameters and local variables.
+Следующий шаг — поместить значение текущего указателя стека в `rbp`. Начиная с этого момента у нас есть новый стековый кадр для функции `foo`. А поскольку стековый кадр готов, мы можем начать управлять параметрами функции и локальными переменными.
 
-The first sixth parameters of the `foo` function were passed using the general purpose registers in the function `bar`. We may see that the eighth and seventh parameters of the `foo` function are pushed on the stack with the `push` instructions in the function `bar` as well. Please note that the eight and seventh arguments of the function `foo` are pushed to the stack especially in this order - first pushed the value `8` and only after the `7`. Above we already mentioned that the stack has the access pattern - `last in, first out`. So if we'd use `pop` instruction right after we pushed these both parameters, we'd get at first seventh and after it eighths argument.
+Первые шесть параметров функции `foo` были переданы с использованием регистров общего назначения в функцию `bar`. Мы можем увидеть, что восьмой и седьмой параметры функции `foo` помещаются в стек с помощью инструкций `push` в функции `bar`. Обратите внимание, что восьмой и седьмой аргументы функции `foo` помещаются в стек именно в таком порядке — сначала помещается значение `8` и только после него `7`. Выше мы уже упоминали, что стек имеет шаблон доступа — `первый-зашел, последним-ушел`. Поэтому, если бы мы использовали инструкцию `pop` сразу после того, как мы поместили эти оба параметра, мы бы получили сначала седьмой, а затем восьмой аргумент.
 
-To do the calculation we need to access the input parameters. As you may see it is done using the address stored in the `rbp` register and offsets from it. The offsets are negative as you may remember the stack grows down towards lower addresses. At first we move the value stored in the `edi` register (the first argument of the `foo` function) to address stored in the `rbp` register with the `-4` (the offset is negative because you should remember that stack grows down) bytes offset. After that we move the value stored in the `esi` register (the second argument of the `foo` function) to the address stored in the `rbp` register with the `-8` bytes offset. We repeat these operations for the all six input arguments.
+Для выполнения расчетов нам нужно получить доступ к входным параметрам. Как вы можете видеть, это делается с использованием адреса, хранящегося в регистре `rbp`, и смещений от него. Смещения отрицательные, поскольку вы, возможно, помните, что стек растет вниз в сторону меньших адресов. Сначала мы перемещаем значение, хранящееся в регистре `edi` (первый аргумент функции `foo`), по адресу, хранящемуся в регистре `rbp` со смещением `-4` (смещение отрицательное, поскольку вы должны помнить, что стек растет вниз) байт. После этого мы перемещаем значение, хранящееся в регистре `esi` (второй аргумент функции `foo`), по адресу, хранящемуся в регистре `rbp` со смещением `-8` байт. Мы повторяем эти операции для всех шести входных аргументов.
 
-Now take a look one more time very carefully:
+А теперь посмотрите еще раз, но уже очень внимательно
 
-> to the address stored in the `rbp` register with the `N` byte offset
+> на адрес, хранящийся в регистре `rbp` со смещением в `N` байт
 
-What was the address stored in the `rbp`? Our stack pointer! So after the last `mov` instruction in the function `foo`, our stack frame will look like this:
+Какой адрес хранился в `rbp`? Наш указатель стека! Итак, после последней инструкции `mov` в функции `foo` наш стековый кадр будет выглядеть так:
 
 ![stack](/content/assets/stack.svg)
+Вот в чем весь смысл регистра `rbp`. Он играет роль якоря в функции или базовой точки. Используя положительные смещения, мы можем получить доступ к адресу возврата и параметрам, помещенным в стек вызывающей стороной, а используя отрицательные смещения, мы можем получить доступ к локальным переменным.
 
-That is the whole sense of the `rbp`. It plays role of an anchor in the function or a base point. Using the positive offsets we may access the return address and the parameters pushed on the stack by the caller and using the negative offsets we may access local variables.
+Прямо перед возвратом из функции `foo` мы можем увидеть так называемый [эпилог функции](https://en.wikipedia.org/wiki/Function_prologue_and_epilogue#Epilogue) мы восстанавливаем начальное значение `rbp`, удаляя его из стека. Последняя инструкция `ret` извлекает адрес возврата из стека, и выполнение продолжается с этого адреса.
 
-Right before the return from the `foo` function we may see so called [function epilogue](https://en.wikipedia.org/wiki/Function_prologue_and_epilogue#Epilogue) we restore the initial value of the `rbp` by removing it from the stack. The last `ret` instruction pops the return address from the stack and the execution continues from this address.
+## Примеры
 
-## Example
+После того, как мы разобрались с самыми важными концепциями, пришло время вернуться к самой интересной части — написанию программ. Давайте взглянем на нашу вторую простую программу на ассемблере. Программа возьмет два целых числа, получит сумму этих чисел и сравнит ее с третьим предопределенным числом. Если предопределенное число равно сумме, программа что-то выведет на экран, если нет — программа просто завершит работу.
 
-After we went thought the most important concepts, it is time to return to the most interesting part - writing the programs. Let's take a look at our second simple assembly program. The program will take two integer numbers, get the sum of these numbers and compare it with the third predefined number. If the predefined number is equal to sum, the program will print something on the screen, if not - the program will just exit.
+Перед написанием кода нам нужно знать, как выполнять основные арифметические выражения и операции сравнения .
 
-Before writing the code we need to know how to execute basic arithmetic expressions and compare the things.
+### Базовые арифметические инструкции
 
-### Basic arithmetic instructions
+Вот список некоторых инструкций ассемблера для выполнения арифметических операций:
 
-Here is the list of some assembly instructions to execute arithmetic operations:
+- `ADD`  - Сложение.
+- `SUB`  - Вычитание.
+- `MUL`  - Беззнаковое умножение.
+- `IMUL` - Знаковое умножение
+- `DIV`  - Беззнаковое деление.
+- `IDIV` - Знаковое деление.
+- `INC`  - Инкрементирование.
+- `DEC`  - Декрементирование.
+- `NEG`  - Отрицание.
 
-- `ADD`  - Addition.
-- `SUB`  - Substraction.
-- `MUL`  - Unsigned multiplication.
-- `IMUL` - Signed multiplication.
-- `DIV`  - Unsigned division.
-- `IDIV` - Signed division.
-- `INC`  - Increment.
-- `DEC`  - Decrement.
-- `NEG`  - Negate.
+Все подробности, связанные с приведенными выше инструкциями, будут описаны в примере далее.
 
-All the details related to the instructions listed above will be described in the example.
+### Инструкции потока управления
 
-### Basic control flow
-
-Now let's take a look at the our first [control flow](https://en.wikipedia.org/wiki/Control_flow) instructions. Usually programming languages have ability to change order of evaluation (for example with `if` or `case` statements, `goto` and so on). Assembly programming language also provides the very basic ability to change the flow of our programs. The first such instruction is `cmp`. This instruction takes two values and performs comparison between them. Usually it is used along with the conditional jump instruction. For example:
+Теперь давайте взглянем на наши первые инструкции [управления потоком](https://en.wikipedia.org/wiki/Control_flow). Обычно языки программирования имеют возможность изменять порядок выполнения (например, с помощью операторов `if` или `case`, `goto` и т. д.). Язык программирования ассемблера также предоставляет самую базовую возможность изменять порядок выполнения наших программ. Первая такая инструкция - `cmp`. Эта инструкция принимает два значения и выполняет сравнение между ними. Обычно она используется вместе с инструкцией условного перехода. Например:
 
 ```assembly
 ;; compare value of the rax register with 50
@@ -369,17 +369,18 @@ cmp rax, 50
 ```
 
 The `cmp` instruction executes only comparison of its parameters without affecting values of the parameters themselves. To perform any actions after the comparison, there is conditional jump instructions. The list of these instructions:
+Инструкция `cmp` выполняет только сравнивает свои операнды, не влияя на их значения. Для выполнения каких-либо действий после сравнения существуют инструкции условного перехода. Список этих инструкций:
 
--  `JE`  - Jump if the values are equal.
--  `JNE` - Jump if the values are not equal.
--  `JZ`  - Jump if the difference between the two values is zero.
--  `JNZ` - Jump if the difference between the two values is not zero.
--  `JG`  - Jump if the first value is greater than the second.
--  `JGE` - Jump if the first is greater or equal to the second.
--  `JA`  - The same that JG, but performs unsigned comparison.
--  `JAE` - The same that JGE, but performs unsigned comparison.
+-  `JE`   - Перейти если значения равны
+-  `JNE` - Перейти если значения не равны.
+-  `JZ`   - Перейти если разница между значениями равна нулю.
+-  `JNZ` - Перейти если разница между значениями не равна нулю.
+-  `JG`   - Перейти если первое значение больше второго.
+-  `JGE` - Перейти если первое значение больше либо равно второму.
+-  `JA`   - То же что и `JG`, но для знакового сравнения.
+-  `JAE` - То же что и `JGE`, но для беззнакового сравнения.
 
-For example if we want translate something like this if/else statement written in C:
+Например, если мы хотим получить что-то вроде этого оператора if/else, написанного на языке C:
 
 ```C
 if (rax != 50) {
@@ -389,7 +390,7 @@ if (rax != 50) {
 }
 ```
 
-to assembly, it will something like this:
+на ассемблере, нам стоит написать следующее:
 
 ```assembly
 ;; compare rax with 50
@@ -400,19 +401,20 @@ jne .foo
 jmp .bar
 ```
 
-In addition we can jump on a label without any conditions with the `jmp` instruction:
+Кроме того, мы можем перейти на метку вобще без каких-либо условий с помощью инструкции `jmp`:
 
 ```assembly
 jmp .label
 ```
 
-Often the unconditional jumps are used to simulate a loop. For example we have label and some code after it. This code executes anything, than we have condition and jump to the start of this code if condition is not successfully. The loops will be covered in next parts.
+Часто безусловные переходы используются для имитации цикла. Например, у нас есть метка и некоторый код после нее. Этот код выполняет что угодно, затем у нас есть условие и переход к началу этого кода, если условие не выполняется. 
+Циклы будут рассмотрены в следующих частях.
 
-### Program example
+### Пример программы
 
-Since we learned some basic arithmetic and control flow instructions, we can write our example. Before we will take a look at the program source code, I will remind that we are going to write a simple program that will calculate the sum of two integer numbers and if the sum equal to the third predefined number we will print a string. Otherwise just exist.
+Поскольку мы уже изучили некоторые основные арифметические и управляющие инструкции, мы можем написать наш пример. Но прежде чем мы взглянем на исходный код программы, я напомню, что мы собираемся написать простую программу, которая вычислит сумму двух целых чисел, и если сумма будет равна третьему предопределенному числу, мы выведем строку. В противном случае ничего не делает.
 
-Here is the source code of our example:
+Вот исходный код нашего примера:
 
 ```assembly
 ;; Definition of the .data section
@@ -470,30 +472,30 @@ _start:
     syscall
 ```
 
-First of all let's try to build, run our program with the similar commands that we have seen in the previous chapter and see the result:
+Для начала попробуем собрать и запустить нашу программу с помощью команд, которые,  мы видели в предыдущей главе, и посмотрим на результат:
 
 ```bash
 $ nasm -f elf64 -o program.o program.asm
 $ ld -o program program.o
 ```
 
-After we built our program, we can run it with:
+После того, как мы создали нашу программу, мы можем запустить ее с помощью:
 
 ```bash
 ~$ ./program
 Sum is correct
 ```
 
-Now let's go through the source code of our program. First of all there is the `.data` section with three variables:
+Теперь давайте пройдемся по исходному коду нашей программы. В первую очередь это раздел `.data` с тремя переменными:
 
 - `num1`
 - `num2`
 - `msg`
 
-The entry point of our program is the `_start` symbol. In the beginning of the source code of our program we put the values of the `num1` and `num2` to the general purpose registers `rax` and `rbx`. After this we can use the `add` instruction to get the sum of these two values. The result of the sum will be stored in the `rax` register.
+Точкой входа нашей программы является символ `_start`. В начале исходного кода нашей программы мы помещаем значения `num1` и `num2` в регистры общего назначения `rax` и `rbx`. После этого мы можем использовать инструкцию `add`, чтобы получить сумму этих двух значений. Результат суммы будет сохранен в регистре `rax`.
 
-According to the description of our program, now we have to compare the sum of two numbers with the predefined number. We do it with the `cmp` instruction. At this point we have two ways to go. The first one - we jump to the `.exit` label if the value of the `rax` (that stores sum of the `num1` and `num2` values) is not equal to `150`. If the sum is equal to `150`, we jump to the `.correctSum` label.
+Согласно описанию нашей программы, теперь нам нужно сравнить сумму двух чисел с третим, но уже предопределенным числом. Мы делаем это с помощью инструкции `cmp`. На этом этапе у нас есть два пути. Первый - мы переходим на метку `.exit`, если значение `rax` (где хранится сумма значений `num1` и `num2`) не равно `150`. Если сумма равна `150`, то переходим на метку `.correctSum`.
 
-The source code of the both `.correctSum` and `.exit` sub-routines should be familiar to us. They both do very similar what we already have seen in the previous chapter. The `.correctSum` sub-routine prints the string from the `msg` to the screen. The `.exit` sub-routine provides us graceful exit from our program.
+Исходный код подпрограмм `.correctSum` и `.exit` должен быть нам знаком. Они обе делают схожие вещи, которые мы уже видели в предыдущей главе. Подпрограмма `.correctSum` выводит строку из `msg` на экран. Подпрограмма `.exit` обеспечивает нам изящный выход из нашей программы.
 
-That is it for this post. In the next post we will continue to dive into assembly programming.
+На этом всё в этом главе. В следующей мы продолжим углубляться в программирование на ассемблере.
