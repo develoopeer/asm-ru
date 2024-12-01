@@ -1,5 +1,5 @@
 
-It is sixth part of Say hello to x86_64 Assembly and here we will look on AT&T assembler syntax. Previously we used nasm assembler in all parts, but there are some another assemblers with different syntax, fasm, yasm and others. As i wrote above we will look on gas (GNU assembler) and difference between it's syntax and nasm. GCC uses GNU assembler, so if you see at assembler output for simple hello world:
+Это уже шестая часть цикла статей "Say hello to x86_64 Assembly", и в ней мы рассмотрим синтаксис ассемблера AT&T. Ранее, во всех предыдущих частях, мы использовали ассемблер NASM, но есть и другие ассемблеры с другим синтаксисом, FASM, YASM и другие. Как я уже писал выше, мы рассмотрим gas (ассемблер GNU) и разницу между его синтаксисом и NASM. GCC использует ассемблер GNU, поэтому если вы посмотритет на испольняемый файл GNU ассемблера для простого hello world:
 
 ```C
 #include <unistd.h>
@@ -10,7 +10,7 @@ int main(void) {
 }
 ```
 
-You will see following output:
+То увидите следующее:
 
 ```assembly
 	.file	"test.c"
@@ -43,13 +43,13 @@ main:
 	.section	.note.GNU-stack,"",@progbits
 ```
 
-Looks different then nasm Hello world, let's look on some differences.
+Выглядит иначе, нежели "Hello World" ассемблера NASM, давайте рассмотрим некоторые отличия.
 
-## AT&T syntax
+## AT&T синтаксис
 
-### Sections
+### Разделы
 
-I don't know how about you, but when I start to write assembler program, usually I'm starting from sections definition. Let's look on simple example:
+Не знаю как вы, но когда я начинаю писать программу на ассемблере, обычно я начинаю с определения секций. Давайте рассмотрим простой пример:
 
 ```assembly
 .data
@@ -65,12 +65,12 @@ _start:
     //
 ```
 
-You can note two little differences here:
+Здесь вы можете заметить два небольших отличия:
 
-* Section definition starts with . symbol
-* Main routine defines with .globl instead global as we do it in nasm
+* Определение раздела начинается с символа `.`
+* Основная процедура определяется с помощью `.globl` вместо `global`, как мы делаем в NASM
 
-Also gas uses another directives for data defintion:
+Также gas использует другие директивы для определения данных:
 
 ```assembly
 .section .data
@@ -93,20 +93,20 @@ Also gas uses another directives for data defintion:
     str3: .string "Hello world"
 ```
 
-Operands order
-When we write assembler program with nasm, we have following general syntax for data manipulation:
+Порядок операндов
+Когда мы пишем программу на ассемблере с помощью NASM, у нас есть следующий общий синтаксис для манипулирования данными:
 
 ```assembly
 mov destination, source
 ```
 
-With GNU assembler we have back order i.e.:
+С ассемблером GNU порядок операндов обратный NASM, а именно:
 
 ```assembly
 mov source, destination
 ```
 
-For example:
+К примеру
 
 ```assembly
 ;;
@@ -120,59 +120,60 @@ mov rax, rcx
 mov %rcx, %rax
 ```
 
-Also you can not here that registers starts with % symbol. If you're using direct operands, need to use `$` symbol:
+Также регистры начинаются с символа %. Если вы используете прямые операнды, нужно использовать символ `$`:
 
 ```assembly
 movb $10, %rax
 ```
 
-### Size of operands and operation syntax
+### Размер операндов и синтаксис инструкций
 
-Sometimes when we need to get part of memory, for example first byte of 64 register, we used following syntax:
+Иногда, когда нам нужно получить часть памяти регистра, например, первый байт 64 битного регистра, мы используем следующий синтаксис:
 
 ```assembly
 mov ax, word [rsi]
 ```
 
-There is another way for such operations in gas. We don't define size in operands but in instruction:
+Есть другой способ для таких операций в ассемблере Gas. Мы определяем размер не в операндах, а в инструкции:
 
 ```assembly
 movw (%rsi), %ax
 ```
 
-GNU assembler has 6 postfixes for operations:
+В ассемблере GNU имеется 6 постфиксов(окончаний) для операций:
 
-* `b` - 1 byte operands
-* `w` - 2 bytes operands
-* `l` - 4 bytes operands
-* `q` - 8 bytes operands
-* `t` - 10 bytes operands
-* `o` - 16 bytes operands
+* `b` - 1 байт операнда
+* `w` - 2 байта операнда
+* `l` - 4 байта операнда
+* `q` - 8 байт операнда
+* `t` - 10 байт операнда
+* `o` - 16 байт операнда
 
-This rule is not only mov instruction, but also for all another like addl, xorb, cmpw and etc...
+Это правило касается не только инструкции mov, но и всех других, таких как addl, xorb, cmpw и т. д.
 
-### Memory access
+### Доступ к памяти
 
-You can note that we used () brackets in previous example instead [] in nasm example. To dereference values in parentheses are used GAS: (%rax), for example:
+Вы можете заметить, что мы использовали скобки () в предыдущем примере, нежели [] в примере с NASM. Для разыменования значений в скобках используется: 
+`(%rax)`, например:
 
 ```assembly
 movq -8(%rbp),%rdi
 movq 8(%rbp),%rdi
 ```
 
-### Jumps
+### Переходы
 
-GNU assembler supports following operators for far functions call and jumps:
+Ассемблер GNU поддерживает следующие операторы для вызова и перехода функций:
 
 ```assembly
 lcall $section, $offset
 ```
 
-Far jump - a jump to an instruction located in a different segment than the current code segment but at the same privilege level, sometimes referred to as an intersegment jump.
+Дальний переход(far jump) — переход к инструкции, расположенной в сегменте, отличном от текущего сегмента кода, но на том же уровне привилегий, иногда называемый межсегментным переходом.
 
-### Comments
+### Коментарии
 
-GNU assembler supports 3 types of comments:
+Gas поддерживает 3 вида комментариев:
 
 ```
     # - single line comments
