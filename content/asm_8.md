@@ -1,89 +1,89 @@
 
-It is eight and final part of Say hello to x86_64 Assembly and here we will take a look on how to work with non-integer numbers in assembler. There are a couple of ways how to work with floating point data:
+Это восьмая и последняя часть цикла статей "Say hello to x86_64 Assembly", и здесь мы рассмотрим, как работать с нецелыми числами в ассемблере. Есть несколько способов работы с данными с плавающей точкой:
 
 * fpu
 * sse
 
-First of all let's look how floating point number stored in memory. There are three floating point data types:
+Сначала давайте посмотрим, как числа с плавающей точкой хранятся в памяти. Существует три типа данных с плавающей точкой:
 
-* single-precision
-* double-precision
-* double-extended precision
+* одинарной точности
+* двойной точности
+* двойной расширенной точности
 
-As Intel's 64-ia-32-architecture-software-developer-vol-1-manual described:
+Как описано в руководстве Intel `64-IA-32-architecture-software-developer-vol-1-manual`:
 
 ```
-The data formats for these data types correspond directly to formats specified in the IEEE Standard 754 for Binary Floating-Point Arithmetic.
+Форматы данных для этих типов данных напрямую соответствуют форматам, указанным в стандарте IEEE 754 для двоичной арифметики с плавающей точкой.
 ```
 
-Single-precision floating-point float point data presented in memory:
+Данные типа float(с плавающей точкой) одинарной точности, представленны в памяти следующим образом:
 
-* sign - 1 bit
-* exponent - 8 bits
-* mantissa - 23 bits
+* знак - 1 bit
+* экспонента - 8 bits
+* мантисса - 23 bits
 
-So for example if we have following number:
+Например, если у нас есть следующее число:
 
     | sign 	| exponent | mantissa
-    |-------|----------|-------------------------
-    | 0  	| 00001111 | 110000000000000000000000
+    |--------- |----------|-------------------------
+    | 0  	    | 00001111 | 110000000000000000000000
 
-Exponent is either an 8 bit signed integer from −128 to 127 or an 8 bit unsigned integer from 0 to 255. Sign bit is zero, so we have positive number. Exponent is 00001111b or 15 in decimal. For single-precision displacement is 127, it means that we need to calculate exponent - 127 or 15 - 127 = -112. Since the normalized binary integer part of the mantissa is always equal to one, then in the mantissa is recorded only its fractional part, so mantissa or our number is 1,110000000000000000000000. Result value will be:
+Экспонента — это либо 8-битное целое число со знаком, принимающе значения от −128 до 127, либо 8-битное целое число без знака, принимающее значения от 0 до 255. Знаковый бит равен нулю, поэтому у нас положительное число. Экспонента равна 00001111b или 15 в десятичной системе счисления. Для смещения одинарной точности, число равно 127, что значит, что нам нужно вычислить экспоненту - 127 или 15 - 127 = -112. Поскольку нормализованная двоичная целая часть мантиссы всегда равна единице, то в мантиссе записывается только ее дробная часть, поэтому мантисса или наше число равно 1,11000000000000000000000000. Значение результата будет:
 
 ```
 value = mantissa * 2^-112
 ```
 
-Double precision number is 64 bit of memory where:
+Число двойной точности — это 64 бита памяти, где:
 
-* sign - 1 bit
-* exponent - 11 bit
-* mantissa - 52 bit
+* знак - 1 bit
+* экспонента - 11 bit
+* мантисса - 52 bit
 
-Result number we can get by:
+Результат мы можем получить с помощью следующего выражения:
 
 ```
 value = (-1)^sign * (1 + mantissa / 2 ^ 52) * 2 ^ exponent - 1023)
 ```
 
-Extended precision is 80 bit numbers where:
+Повышенная точность — это 80-битные числа, где:
 
-* sign - 1 bit
-* exponent - 15 bit
-* mantissa - 112 bit
+* знак - 1 bit
+* экспонента - 15 bit
+* мантисса - 112 bit
 
-Read more about it - [here](https://en.wikipedia.org/wiki/Extended_precision). Let's look at simple example.
+Подробнее почитать расширенной точности можете [здесь](https://ru.wikipedia.org/wiki/%D0%A0%D0%B0%D1%81%D1%88%D0%B8%D1%80%D0%B5%D0%BD%D0%BD%D0%B0%D1%8F_%D1%82%D0%BE%D1%87%D0%BD%D0%BE%D1%81%D1%82%D1%8C). 
 
 ## x87 FPU
 
-The x87 Floating-Point Unit (FPU) provides high-performance floating-point processing. It supports the floating-point, integer, and packed BCD integer data types and the floating-point processing algorithms. x87 provides following instructions set:
+Модуль Floating-Point Unit (FPU) x87 обеспечивает высокопроизводительную обработку с плавающей точкой. Он поддерживает типы данных с плавающей точкой, целые числа и упакованные целые числа BCD, а также алгоритмы обработки с аргумента в виде числ с плавающей точкой. x87 предоставляет следующий набор инструкций:
 
-* Data transfer instructions
-* Basic arithmetic instructions
-* Comparison instructions
-* Transcendental instructions
-* Load constant instructions
-* x87 FPU control instructions
+* Инструкции по передаче данных
+* Базовые арифметические инструкции
+* Инструкции сравнения
+* Трансцендентные инструкции
+* Инструкции по загрузке констант
+* Инструкции управления FPU x87
 
-Of course we will not see all instructions here provided by x87, for additional information see 64-ia-32-architecture-software-developer-vol-1-manual Chapter 8. There are a couple of data transfer instructions:
+Конечно, мы не увидим здесь всех инструкций, предоставляемых набором инструкций x87, для получения дополнительной информации см. `64-ia-32-architecture-software-developer-vol-1-manual, Глава 8`. Есть несколько инструкций по передаче данных:
 
-* `FDL` - load floating point
-* `FST` - store floating point (in ST(0) register)
-* `FSTP` - store floating point and pop (in ST(0) register)
+* `FDL` - загрузка плавающей точки
+* `FST` - сохранение плавающей точки (в регистре ST(0))
+* `FSTP` - сохранение плавающей точки и извлечение (в регистре ST(0))
 
-Arithmetic instructions:
+Арифметические инструкции:
 
-* `FADD` - add floating point
-* `FIADD` - add integer to floating point
-* `FSUB` - subtract floating point
-* `FISUB` - subtract integer from floating point
-* `FABS` - get absolute value
-* `FIMUL` - multiply integer and floating point
-* `FIDIV` - device integer and floating point
+* `FADD` - сложение чисел с плавающей точкой
+* `FIADD` - сложение целого числа с число с плавающей точкой
+* `FSUB` - вычитание чисел с плавающей точкой
+* `FISUB` - вычитание целого числа из числа с плавающей точкой
+* `FABS` - получение абсолютного значения
+* `FIMUL` - умножение целого числа и числа с плавающей точкой
+* `FIDIV` - деление целого числа и числа с плавающей точкой
 
-and etc... FPU has eight 10 byte registers organized in a ring stack. Top of the stack - register ST(0), other registers are ST(1), ST(2) ... ST(7). We usually uses it when we are working with floating point data.
+и т. д... FPU имеет восемь 10-байтовых регистров, организованных в кольцевой стек. Верх стека - регистр ST(0), остальные регистры - ST(1), ST(2) ... ST(7). Обычно мы используем их, когда работаем с данными с плавающей точкой.
 
-For example:
+К примеру следующий код
 
 ```assembly
 section .data
@@ -92,7 +92,7 @@ section .data
 fld dword [x]
 ```
 
-pushes value of x to this stack. Operator can be 32bit, 64bit or 80bit. It works as usual stack, if we push another value with fld, x value will be in ST(1) and new value will be in ST(0). FPU instructions can use these registers, for example:
+помещает значение x в этот стек. Оператор может быть 32, 64 или 80-битным. Этот стек работает также как и обычный стек, если мы помещаем другое значение с помощью `fld`, значение x будет в ST(1), а новое значение будет в ST(0). Инструкции `FPU` могут использовать эти регистры, например:
 
 ```assembly
 ;;
@@ -108,7 +108,7 @@ fld dword [y]
 fadd
 ```
 
-Let's look on simple example. We will have circle radius and calculate circle square and print it:
+Давайте рассмотрим на простой пример. У нас есть радиус круга, а мы хотим вычислить площадь круга и вывести ее на печать:
 
 ```assembly
 extern printResult
@@ -141,7 +141,10 @@ _start:
 		syscall
 ```
 
-Let's try to understand how it works: First of all there is data section with predefined radius data and result which we will use for storing result. After this 2 constants for calling exit system call. Next we see entry point of program - _start. There we stores radius value in st0 and st1 with fld instruction and multiply this two values with fmul instruction. After this operations we will have result of radius on radius multiplication in st0 register. Next we load The number π with fldpi instruction to the st0 register, and after it radius * radius value will be in st1 register. After this execute multiplication with fmul on st0 (pi) and st1 (value of radius * radius), result will be in st0 register. Ok, now we have circle square in st0 register and can extract it with fstp instruction to the result. Next point is to pass result to the C function and call it. Remember we call C function from assembly code in previous blog post. We need to know x86_64 calling convention. In usual way we pass function parameters through registers rdi (arg1), rsi (arg2) and etc..., but here is floating point data. There is special registers: xmm0 - xmm15 provided by sse. First of all we need to put number of xmmN register to rax register (0 for our case), and put result to xmm0 register. Now we can call C function for printing result:
+Давайте попробуем понять, как код работает: прежде всего, есть раздел данных с предопределенными данными радиуса и результатом, который мы будем использовать для сохранения результата. 
+Дальше идут 2 константы для вызова системного вызова `exit`. Далее мы видим точку входа программы - _start. Там мы сохраняем значение радиуса в `st0` и `st1` с помощью инструкции `fld` и умножаем эти два значения с помощью инструкции `fmul`. После этих операций у нас будет результат умножения радиуса на радиус(возведение радиуса в квадрат) в регистре `st0`. Затем мы загружаем число π с помощью инструкции `fldpi` в регистр `st0`, а после этого значение квадрата радиуса будет в регистре `st1`.
+После этого выполняем умножение с помощью `fmul` на `st0` (пи) и `st1` (значение радиуса * радиус), результат будет в регистре `st0`. 
+Хорошо, теперь у нас есть квадрат радиуса в регистре `st0` и мы можем извлечь его с помощью инструкции `fstp` в результат. Следующее действие - передать результат в функцию C и вызвать ее. Помните, как мы вызывали функцию C из ассемблерного кода в предыдущей статье блога. Нам нужно знать соглашение о вызовах `x86_64`. Обычно мы передаем параметры функции через регистры `rdi` (arg1), `rsi` (arg2) и т. д., но здесь данные с плавающей точкой. Существуют специальные регистры: `xmm0` - `xmm15`, предоставляемые набором инструкций `sse`. Для начала нам нужно поместить номер регистра `xmmN` в регистр `rax` (0 в нашем случае), а результат поместить в регистр `xmm0`. Теперь мы можем вызвать функцию C для печати результата:
 
 ```C
 #include <stdio.h>
@@ -154,7 +157,7 @@ int printResult(double result) {
 }
 ```
 
-We can build it with:
+Компилируем и собирем исполняемый файл с помощью команд:
 
 ```
 build:
@@ -167,6 +170,6 @@ clean:
 	rm -rf testFloat1
 ```
 
-And run:
+И запускаем.
 
 ![result](/content/assets/result_asm_8.png)
