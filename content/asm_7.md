@@ -1,17 +1,17 @@
 
-It is seventh part of Say hello to x86_64 Assembly and here we will look on how we can use C together with assembler.
+Это седьмая часть цикла статей "Say hello to x86_64 Assembly", и в ней мы рассмотрим, как мы можем использовать язык C вместе с ассемблером.
 
-Actually we have 3 ways to use it together:
+На самом деле у нас есть 3 способа использовать их вместе:
 
-* Call assembly routines from C code
-* Call c routines from assembly code
-* Use inline assembly in C code
+* Вызов процедур ассемблера из кода C
+* Вызов процедур C из кода ассемблера
+* Использование встроенного ассемблера в коде C
 
-Let's write 3 simple Hello world programs which shows us how to use assembly and C together.
+Давайте напишем 3 простые программы Hello world, которые покажут нам, как использовать ассемблер и C вместе.
 
-## Call assembly from C
+## Вызов кода ассемблера из кода C
 
-First of all let's write simple C program like this:
+Для начала давайте напишем простую программу на языке C, например:
 
 ```C
 #include <string.h>
@@ -24,7 +24,7 @@ int main() {
 }
 ```
 
-Here we can see C code which defines two variables: our Hello world string which we will write to stdout and length of this string. Next we call printHelloWorld assembly function with this 2 variables as parameters. As we use x86_64 Linux, we must know x86_64 linux calling convetions, so we will know how to write printHelloWorld function, how to get incoming parameters and etc... When we call function first six parameters passes through rdi, rsi, rdx, rcx, r8 and r9 general purpose registers, all another through the stack. So we can get first and second parameter from rdi and rsi registers and call write syscall and than return from function with ret instruction:
+Здесь мы видим код C, который определяет две переменные: нашу строку Hello world, которую мы запишем в `stdout`, и длину этой строки. Затем мы вызываем функцию ассемблера `printHelloWorld` с этими 2 переменными в качестве параметров. Поскольку мы используем x86_64 Linux, мы должны знать правила вызова x86_64 linux, для того чтобы знать, как написать функцию `printHelloWorld`, как получить входящие параметры и т. д. Когда мы вызываем функцию, первые шесть параметров проходят через регистры общего назначения `rdi`, `rsi`, `rdx`, `rcx`, `r8` и `r9`, все остальные через стек. Таким образом, мы можем получить первый и второй параметры из регистров `rdi` и `rsi` и вызвать системный вызов `write`, а затем вернуться из функции с помощью инструкции `ret`:
 
 ```assembly
 global printHelloWorld
@@ -44,7 +44,7 @@ printHelloWorld:
 		ret
 ```
 
-Now we can build it with:
+Теперь мы можем скомпилировать и собрать исполняемый файл с помощью:
 
 ```
 build:
@@ -52,29 +52,29 @@ build:
 	gcc casm.o casm.c -o casm
 ```
 
-## Inline assembly
+## Встроенный ассемблер
 
-The following method is to write assembly code directly in C code. There is special syntax for this. It has general view:
+Следующий метод заключается в написании ассемблерного кода непосредственно в коде C. Для этого существует специальный синтаксис. Он имеет общий вид:
 
 ```
 asm [volatile] ("assembly code" : output operand : input operand : clobbers);
 ```
 
-As we can read in gcc documentation volatile keyword means:
+Как мы можем прочитать в документации gcc, ключевое слово volatile означает:
 
 ```
-The typical use of Extended asm statements is to manipulate input values to produce output values. However, your asm statements may also produce side effects. If so, you may need to use the volatile qualifier to disable certain optimizations
+Типичное использование расширенных выражений asm — манипулирование входными значениями для получения выходных значений. Однако ваши операторы asm могут также создавать побочные эффекты. Если это так, вам может потребоваться использовать квалификатор volatile для отключения определенных оптимизаций
 ```
 
-Each operand is described by constraint string followed by C expression in parentheses. There are a number of constraints:
+Каждый операнд описывается строкой ограничений, за которой в скобках следует выражение C. Существует ряд ограничений:
 
-* `r` - Kept variable value in general purpose register
-* `g` - Any register, memory or immediate integer operand is allowed, except for registers that are not general registers.
-* `f` - Floating point register
-* `m` - A memory operand is allowed, with any kind of address that the machine supports in general.
-* and etc...
+* `r` - Сохраненное значение переменной в регистре общего назначения
+* `g` - Разрешен любой регистр, память или непосредственный целочисленный операнд, за исключением регистров, которые не являются общими регистрами.
+* `f` - Регистр с плавающей точкой
+* `m` - Разрешен операнд памяти с любым типом адреса, который машина поддерживает в принципе.
+* и т. д.
 
-So our hello world will be:
+Итак наше приложение будет выглядеть следующим образом:
 
 ```C
 #include <string.h>
@@ -96,22 +96,22 @@ int main() {
 }
 ```
 
-Here we can see the same 2 variables as in previous example and inline assembly definition. First of all we put 1 to rax and rdi registers (write system call number, and stdout) as we did it in our plain assembly hello world. Next we do similar operation with rsi and rdi registers but first operands starts with % symbol instead $. It means str is the output operand referred by %1 and len second output operand referred by %2, so we put values of str and len to rsi and rdi with %n notation, where n is number of output operand. Also there is %% prefixed to the register name.
+Здесь мы видим те же 2 переменные, что и в предыдущем примере, и определение встроенного ассемблера. Прежде всего мы помещаем 1 в регистры `rax` и `rdi` (запись номера системного вызова и `stdout`), как мы делали это в нашем простом "Hello world". Затем мы выполняем похожую операцию с регистрами `rsi` и `rdi`, но первый операнд начинается с символа % вместо $. Это означает, что `str` — это выходной операнд, на который ссылается %1, а `len` — второй выходной операнд, на который ссылается %2, поэтому мы помещаем значения `str` и `len` в `rsi` и `rdi` с нотацией `%n`, где n — номер выходного операнда. Также есть префикс к имени регистра добавляется префикс `%%`.
 
 ```
-    This helps GCC to distinguish between the operands and registers. operands have a single % as prefix
+    Это помогает GCC различать операнды и регистры. Операнды имеют один префикс %
 ```
 
-We can build it with:
 
+Теперь мы можем скомпилировать и собрать исполняемый файл с помощью:
 ```
 build:
 	gcc casm.c -o casm
 ```
 
-## Call C from assembly
+## Вызов кода C из ассемблера
 
-And the last method is to call C function from assembly code. For example we have following simple C code with one function which just prints Hello world:
+И последний метод — вызвать функцию C из ассемблерного кода. Например, у нас есть следующий простой код C с одной функцией, которая просто печатает Hello world:
 
 ```C
 #include <stdio.h>
@@ -124,7 +124,7 @@ int print() {
 }
 ```
 
-Now we can define this function as extern in our assembly code and call it with call instruction as we do it much times in previous posts:
+Теперь мы можем определить эту функцию как `extern` в нашем ассемблерном коде и вызвать ее с помощью инструкции call, как мы делали это много раз в предыдущих постах:
 
 ```asssembly
 global _start
@@ -141,7 +141,7 @@ _start:
 		syscall
 ```
 
-Build it with:
+Компилируем и собираем исполняемый файл с помощью:
 
 ```
 build:
@@ -150,4 +150,4 @@ build:
 	ld   -dynamic-linker /lib64/ld-linux-x86-64.so.2 -lc casm.o c.o -o casm
 ```
 
-and now we can run our third hello world.
+и теперь мы можем запустить наш третий и последний на сегодня "Hello World".
