@@ -1,6 +1,6 @@
 # Концепты архитектуры `x86_64`
 
-Несколько дней назад я написал первый пост - [Введение в ассемблер](https://github.com/0xAX/asm/blob/master/content/asm_1.md), который, к моему удивлению, вызвал большой интерес:
+Несколько дней назад я написал первый пост - [Введение в ассемблер](asm_1.md), который, к моему удивлению, вызвал большой интерес:
 
 ![newscombinator](./assets/newscombinator-screenshot.png)
 ![reddit](./assets/reddit-screenshot.png)
@@ -13,18 +13,16 @@ It motivated me to continue describing my journey through learning assembly prog
 
 Помимо этих людей, я хочу сказать спасибо всем, кто принял участие в обсуждении на [reddit](https://www.reddit.com/r/programming/comments/2exmpu/say_hello_to_assembly_part_1_linux_x8464/). Было много разных мнений, о том, что первая часть была не очень понятна для абсолютного новичка. Поэтому я решил писать более информативные посты. Итак, начнем со вторую часть изучения программирования на ассемблере.
 
-## Терминология and Concepts
+## Терминология и Концепты
 
 Как я уже писал выше, я получил много комментариев от разных людей о том, что некоторые части первого поста могли оказаться неясными. Несмотря на то, что я пытался переработать первую часть, чтобы сделать некоторые вещи более понятными, главной целью было просто введение без глубокого погружения. Мы получили нашу первую программу на ассемблере, которую мы можем запустить на нашем компьютере. Теперь пришло время начать с основ. Давайте начнем с описания некоторой терминологии, которую мы увидим и будем использовать в этой и в следующих частях.
 
 ### Регистры процессора
 
-One of the first concept that we have met in the previous part was - `register`. In the previous chapter we agreed that we can consider a `register` as a small memory slot. If we'll read the definition at [wikipedia](https://en.wikipedia.org/wiki/Processor_register), we will see that it is not so far from the reality:
 Одной из первых концепций, с которой мы познакомились в предыдущей части, был - `регистр`. В предыдущей главе мы согласились, что `регистр` можно рассматривать как небольшую ячейку памяти. Если мы прочитаем определение в [википедии](https://ru.wikipedia.org/wiki/%D0%A0%D0%B5%D0%B3%D0%B8%D1%81%D1%82%D1%80_(%D1%86%D0%B8%D1%84%D1%80%D0%BE%D0%B2%D0%B0%D1%8F_%D1%82%D0%B5%D1%85%D0%BD%D0%B8%D0%BA%D0%B0)), то увидим, что оно не так уж и далеко от реальности:
 
 > Регистр процессора — это быстродоступная память, доступная процессору компьютера.
 
-The main goal of a processor is data processing. To process data, a processor should be able to access this data somewhere. Of course, a processor can get data from [main memory](https://en.wikipedia.org/wiki/Random-access_memory), but it is "slow" operation. If we will take a look at the [Latency Numbers Every Programmer Should Know](https://samwho.dev/numbers), we will see the following picture:
 Основная цель процессора — обработка данных. Чтобы обрабатывать данные, процессор должен иметь возможность доступа к этим данным. Конечно, как и упоминалось в первой статье, процессор может получать данные из [оперативной памяти](https://ru.wikipedia.org/wiki/%D0%9E%D0%BF%D0%B5%D1%80%D0%B0%D1%82%D0%B8%D0%B2%D0%BD%D0%B0%D1%8F_%D0%BF%D0%B0%D0%BC%D1%8F%D1%82%D1%8C), но это «медленная» операция. Если мы взглянем на сайт [Задержки испольнения, которые должен знать каждый программист](https://samwho.dev/numbers), то увидим следующую картину:
 
 > L1 cache reference = 1ns
@@ -51,7 +49,7 @@ There are different types of registers on the `x86_64` processors:
 - Регистры защиты памяти
 - Регистры управления памятью
 
-Подробное описание любого типа регистров вы можете найти в [руководствах для разработчиков программного обеспечения Intel](https://www.intel.com/content/www/us/en/developer/articles/technical/intel-sdm.html). На данный момент мы остановимся только на описании регистров общего назначения, так как в большинстве наших примеров мы будем использовать в основном именно их. Если мы будем использовать другие типы регистров, это будет упомянуто в соответствующем примере. Мы уже видели набор регистров общего назначения в [предыдущей главе](https://github.com/0xAX/asm/blob/master/content/asm_1.md):
+Подробное описание любого типа регистров вы можете найти в [руководствах для разработчиков программного обеспечения Intel](https://www.intel.com/content/www/us/en/developer/articles/technical/intel-sdm.html). На данный момент мы остановимся только на описании регистров общего назначения, так как в большинстве наших примеров мы будем использовать в основном именно их. Если мы будем использовать другие типы регистров, это будет упомянуто в соответствующем примере. Мы уже видели набор регистров общего назначения в [предыдущей главе](asm_1.md):
 
 ![registers](/content/assets/registers.png)
 
@@ -87,7 +85,7 @@ There are different types of registers on the `x86_64` processors:
 
 ### Системные вызовы
 
-[Системные вызовы](https://en.wikipedia.org/wiki/System_call) — это набор API, предоставляемый операционной системой. Программа уровня пользователя может использовать этот API для достижения различных функциональных возможностей, которые может предоставить ядро ​​операционной системы. Как упоминалось в предыдущей [главе](https://github.com/develoopeer/asm/blob/master/content/asm_1.md), вы можете найти все системные вызовы ядра Linux для архитектуры `x86_64` [здесь](https://github.com/torvalds/linux/blob/master/arch/x86/entry/syscalls/syscall_64.tbl).
+[Системные вызовы](https://en.wikipedia.org/wiki/System_call) — это набор API, предоставляемый операционной системой. Программа уровня пользователя может использовать этот API для достижения различных функциональных возможностей, которые может предоставить ядро ​​операционной системы. Как упоминалось в предыдущей [главе](asm_1.md), вы можете найти все системные вызовы ядра Linux для архитектуры `x86_64` [здесь](https://github.com/torvalds/linux/blob/master/arch/x86/entry/syscalls/syscall_64.tbl).
 
 Существует два способа выполнения системного вызова. Мы можем вызвать библиотечную функцию, к примеру, [printf](https://man7.org/linux/man-pages/man3/fprintf.3.html), которая уже в свою очередь будет использовать API  Операционной Системы, или мы можем вызвать системный вызов самостоятельно, используя инструкцию `syscall`. Чтобы выполнить системный вызов напрямую, нам нужно подготовить параметры этой функции. Как мы видели в предыдущей части, для этой цели использовались некоторые регистры общего назначения. То, как вызываются системные вызовы и функции, и как передаются их параметры, называется - `соглашения о вызовах`. Для Linux `x86_64` соглашения о вызовах указаны в документе [System V Application Binary Interface](https://en.wikipedia.org/wiki/Application_binary_interface).
 
@@ -305,7 +303,6 @@ mov     rbp, rsp
 
 Регистр `rsp` всегда указывает на `вершину` стека и называется - указателем стека(`stack pointer`). После того, как мы что-то помещаем в стек с помощью инструкции `push`, адрес указателя стека уменьшается. После того, как мы что-то извлекаем из стека с помощью инструкции `pop`, адрес указателя стека увеличивается.
 
-The general purpose register `rbp` is the so-called `frame pointer` or `base pointer`. As we mentioned above, each function has own `stack frame` - is a memory area where function stores [local variables](https://en.wikipedia.org/wiki/Local_variable) and other data.
 Регистр общего назначения `rbp` - это так называемый указатель кадра(`frame pointer`) или указатель базы(`base pointer`). Как мы уже упоминали выше, каждая функция имеет свой `фрейм стека` - это область памяти, где функция хранит [локальные переменные](https://ru.wikipedia.org/wiki/%D0%9B%D0%BE%D0%BA%D0%B0%D0%BB%D1%8C%D0%BD%D0%B0%D1%8F_%D0%BF%D0%B5%D1%80%D0%B5%D0%BC%D0%B5%D0%BD%D0%BD%D0%B0%D1%8F) и другие данные.
 
 Теперь, когда мы знаем приблизительное значение термина кадр стека и использование регистров `rbp`, `rsp` и `rip`, давайте попробуем понять, что происходит, когда мы вызываем функцию. Посмотрим на стек прямо перед выполнением `call foo`. Сейчас наш стек выглядит так:
@@ -368,7 +365,6 @@ The general purpose register `rbp` is the so-called `frame pointer` or `base poi
 cmp rax, 50
 ```
 
-The `cmp` instruction executes only comparison of its parameters without affecting values of the parameters themselves. To perform any actions after the comparison, there is conditional jump instructions. The list of these instructions:
 Инструкция `cmp` выполняет только сравнивает свои операнды, не влияя на их значения. Для выполнения каких-либо действий после сравнения существуют инструкции условного перехода. Список этих инструкций:
 
 -  `JE`   - Перейти если значения равны
