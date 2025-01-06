@@ -5,7 +5,7 @@
 ![newscombinator](./assets/newscombinator-screenshot.png)
 ![reddit](./assets/reddit-screenshot.png)
 
-Это еще сильнее замотивировало меня продолжать описывать свой путь изучения программирования на ассемблере для Linux x86_64. За эти дни я получил замечательные отзывы от различных людей в интернете. Было много благодарных слов, но что для меня важнее, было много советов и много адекватной и очень полезной критики. Особенно хочу сказать слова благодарности за замечательные отзывы следующим людям:
+It motivated me to continue describing my journey through learning assembly programming for Linux x86_64. During these days I got great feedback from people all over the Internet. There were many words of gratitude, but, what is more important to me, there was also much adequate advice and very useful criticism. Especially, I want to say thank you for the great feedback to:
 
 - [Fiennes](https://reddit.com/user/Fiennes)
 - [Grienders](https://disqus.com/by/Universal178/)
@@ -332,12 +332,8 @@ The general purpose register `rbp` is the so-called `frame pointer` or `base poi
 
 Какой адрес хранился в `rbp`? Наш указатель стека! Итак, после последней инструкции `mov` в функции `foo` наш стековый кадр будет выглядеть так:
 
-<<<<<<< HEAD
-![stack](/content/assets/stack.svg)
-Вот в чем весь смысл регистра `rbp`. Он играет роль якоря в функции или базовой точки. Используя положительные смещения, мы можем получить доступ к адресу возврата и параметрам, помещенным в стек вызывающей стороной, а используя отрицательные смещения, мы можем получить доступ к локальным переменным.
-=======
 ![stack](./assets/stack.svg)
->>>>>>> a9e48b4 (asm: update diagrams)
+Вот в чем весь смысл регистра `rbp`. Он играет роль якоря в функции или базовой точки. Используя положительные смещения, мы можем получить доступ к адресу возврата и параметрам, помещенным в стек вызывающей стороной, а используя отрицательные смещения, мы можем получить доступ к локальным переменным.
 
 Прямо перед возвратом из функции `foo` мы можем увидеть так называемый [эпилог функции](https://en.wikipedia.org/wiki/Function_prologue_and_epilogue#Epilogue) мы восстанавливаем начальное значение `rbp`, удаляя его из стека. Последняя инструкция `ret` извлекает адрес возврата из стека, и выполнение продолжается с этого адреса.
 
@@ -421,22 +417,7 @@ jmp .label
 Вот исходный код нашего примера:
 
 ```assembly
-;; Definition of the .data section
-section .data
-    ;; The first number
-    num1 dq 0x64
-    ;; The second number
-    num2 dq 0x32
-    ;; The message to print if the sum is correct
-    msg  db "The sum is correct!", 10
-
-;; Definition of the .text section
-section .text
-    ;; Reference to the entry point of our program
-    global _start
-
-;; Entry point
-_start:
+```assembly
     ;; Set the value of the num1 to the rax
     mov rax, [num1]
     ;; Set the value of the num2 to the rbx
@@ -464,13 +445,40 @@ _start:
     ;; Call the `sys_write` system call.
     syscall
     ; Go to the exit of the program.
+    ;; Set the value of num1 to rax
+    mov rax, [num1]
+    ;; Set the value of num2 to rbx
+    mov rbx, [num2]
+    ;; Get the sum of rax and rbx. The result is stored in rax.
+    add rax, rbx
+.compare:
+    ;; Compare the rax value with 150
+    cmp rax, 150
+    ;; Go to the .exit label if the rax value is not 150
+    jne .exit
+    ;; Go to the .correctSum label if the rax value is 150
+    jmp .correctSum
+
+;; Print a message that the sum is correct
+.correctSum:
+    ;; Specify the system call number (1 is `sys_write`).
+    mov rax, 1
+    ;; Set the first argument of `sys_write` to 1 (`stdout`).
+    mov rdi, 1
+    ;; Set the second argument of `sys_write` to the reference of the `msg` variable.
+    mov rsi, msg
+    ;; Set the third argument to the length of the `msg` variable's value (20 bytes).
+    mov rdx, 20
+    ;; Call the `sys_write` system call.
+    syscall
+    ;; Go to the exit of the program.
     jmp .exit
 
-; exit procedure
+;; Exit procedure
 .exit:
-    ;; Number of the system call. 60 - `sys_exit`.
+    ;; Specify the number of the system call (60 is `sys_exit`).
     mov rax, 60
-    ;; The first argument of the `sys_exit` system call.
+    ;; Set the first argument of `sys_exit` to 0. The 0 status code is success.
     mov rdi, 0
     ;; Call the `sys_exit` system call.
     syscall
