@@ -5,7 +5,7 @@
 ![newscombinator](./assets/newscombinator-screenshot.png)
 ![reddit](./assets/reddit-screenshot.png)
 
-It motivated me to continue describing my journey through learning assembly programming for Linux x86_64. During these days I got great feedback from people all over the Internet. There were many words of gratitude, but, what is more important to me, there was also much adequate advice and very useful criticism. Especially, I want to say thank you for the great feedback to:
+Это еще сильнее замотивировало меня продолжать описывать свой путь изучения программирования на ассемблере для Linux x86_64. За эти дни я получил замечательные отзывы от различных людей в интернете. Было много благодарных слов, но что для меня важнее, было много советов и много адекватной и очень полезной критики. Особенно хочу сказать слова благодарности за замечательные отзывы следующим людям:
 
 - [Fiennes](https://reddit.com/user/Fiennes)
 - [Grienders](https://disqus.com/by/Universal178/)
@@ -33,7 +33,7 @@ It motivated me to continue describing my journey through learning assembly prog
 
 Доступ к [кэшу L1](https://ru.wikipedia.org/wiki/%D0%9A%D1%8D%D1%88#%D0%A3%D1%80%D0%BE%D0%B2%D0%BD%D0%B8_%D0%BA%D1%8D%D1%88%D0%B0) в `100x` раз быстрее, чем доступ к оперативной памяти. Регистры процессора находятся ближе к процессору. Например, вы можете взглянуть на список задержек для различных инструкций [Agner Fog](https://www.agner.org/optimize/#manual_instr_tab).
 
-There are different types of registers on the `x86_64` processors:
+Существуют разные типы регистров процессора архитектуры `x86_64`:
 
 - Регистры общего назначения
 - Регистры сегментов
