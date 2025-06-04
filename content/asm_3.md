@@ -250,3 +250,7 @@ exit:
 ```
 
 Это все.
+<div style="display: flex; justify-content: space-between;">
+  <a href="./asm_2.md">Предыдущая статья</a>
+  <a href="./asm_4.md">Следующая статья</a>
+</div>

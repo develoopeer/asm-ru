@@ -173,3 +173,5 @@ clean:
 И запускаем.
 
 ![result](/content/assets/result_asm_8.png)
+
+[Предыдущая статья](asm_7.md)

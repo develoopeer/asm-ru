@@ -293,3 +293,8 @@ hello, world!
 ```
 
 🎉 Поздравляю, вы написали первую программу на языке ассемблер. 🎉
+
+<div style="display: flex; justify-content: space-between;">
+  <a href="./asm_1.md"></a>
+  <a href="./asm_2.md">Следующая статья</a>
+</div>

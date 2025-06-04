@@ -151,3 +151,7 @@ build:
 ```
 
 и теперь мы можем запустить наш третий и последний на сегодня "Hello World".
+<div style="display: flex; justify-content: space-between;">
+  <a href="./asm_6.md">Предыдущая статья</a>
+  <a href="./asm_8.md">Следующая статья</a>
+</div>

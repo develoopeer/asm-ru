@@ -194,3 +194,7 @@ clean:
 * `CMPSB` - сравнение последовательности байтов
 * `SCASB` - просмотр строки из байтов
 * `STOSB` - запись байта в строку
+<div style="display: flex; justify-content: space-between;">
+  <a href="./asm_3.md">Предыдущая статья</a>
+  <a href="./asm_5.md">Следующая статья</a>
+</div>

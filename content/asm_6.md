@@ -180,3 +180,7 @@ Gas поддерживает 3 вида комментариев:
     // - single line comments
     /* */ - for multiline comments
 ```
+<div style="display: flex; justify-content: space-between;">
+  <a href="./asm_5.md">Предыдущая статья</a>
+  <a href="./asm_7.md">Следующая статья</a>
+</div>

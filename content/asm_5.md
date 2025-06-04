@@ -136,3 +136,7 @@ _start:
 ### %include
 
 Мы можем включать другие файлы сборки и переходить к их меткам или вызывать функции с помощью директивы %include.
+<div style="display: flex; justify-content: space-between;">
+  <a href="./asm_4.md">Предыдущая статья</a>
+  <a href="./asm_6.md">Следующая статья</a>
+</div>
